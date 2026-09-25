@@ -34,6 +34,14 @@ symlinking into `/usr/local/bin` (already on PATH):
 The Makefile additionally pins `GO := /usr/local/go/bin/go` (with a PATH
 fallback), so make targets work in any shell.
 
+## Git configuration notes
+
+- The canonical repo sets `core.filemode=false`: files were staged via
+  `/mnt/c` (mode 755) and mode tracking carries no signal for this tree;
+  it also makes the mirrored `.git` work correctly on Windows NTFS without
+  per-mirror fixes.
+- Text files are LF everywhere (`.gitattributes`: `* text=auto eol=lf`).
+
 ## Repositories and sync workflow
 
 - **Canonical execution repo**: `~/projects/relayforge` (WSL2 ext4). All
