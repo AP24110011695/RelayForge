@@ -1,46 +1,46 @@
-# RelayForge Makefile (Phase 1).
+# RelayForge Makefile.
 #
-# The repository intentionally contains ZERO .go files at the end of Phase 1
-# (labs live in ~/rf-labs). On a module with no packages, `go vet` and
-# `go test` exit non-zero ("no packages to ..."), so the package targets are
-# guarded: they print an honest no-op note now and run the real command the
-# moment Go code exists (Phase 3 adds internal/logengine).
+# Run from the WSL2 ext4 checkout (see docs/ENVIRONMENT.md). GO is pinned to
+# /usr/local/go/bin because that is where the toolchain lives; it falls back
+# to PATH if the pin disappears.
 
-PATH := /usr/local/go/bin:$(PATH)
-export PATH
+GO := /usr/local/go/bin/go
+ifeq ($(wildcard /usr/local/go/bin/go),)
+GO := go
+endif
 
-HAS_GO_FILES := $(shell find . -name '*.go' -not -path './.git/*' | head -1)
+FUZZTIME ?= 15s
 
-.PHONY: build test race vet fmt
+.PHONY: build test test-race vet fmt fuzz
 
 build:
-ifdef HAS_GO_FILES
-	go build ./...
-else
-	@echo "build: no Go packages yet (zero .go files by design in Phase 1)"
-endif
+	$(GO) build ./...
 
 test:
-ifdef HAS_GO_FILES
-	go test ./...
-else
-	@echo "test: no Go packages yet (zero .go files by design in Phase 1)"
-endif
+	$(GO) test ./...
 
-race:
-ifdef HAS_GO_FILES
-	go test -race ./...
-else
-	@echo "race: no Go packages yet (zero .go files by design in Phase 1)"
-endif
+test-race:
+	$(GO) test -race ./...
 
 vet:
-ifdef HAS_GO_FILES
-	go vet ./...
-else
-	@echo "vet: no Go packages yet (zero .go files by design in Phase 1)"
-endif
+	$(GO) vet ./...
 	gofmt -l .
 
 fmt:
-	gofmt -w .
+	gofmt -l -w .
+
+# Runs each Fuzz* target for FUZZTIME, one invocation per target (go test
+# -fuzz only accepts a single target per run). Prints a note until the first
+# fuzz target lands in Phase 2.
+fuzz:
+	@status=0; found=0; \
+	for pkg in $$($(GO) list ./...); do \
+		if [ "$$pkg" = "relayforge" ]; then dir=.; else dir=./$${pkg#relayforge/}; fi; \
+		for t in $$($(GO) test -list '^Fuzz' $$dir 2>/dev/null | grep '^Fuzz' || true); do \
+			found=1; \
+			echo ">> fuzzing $$t ($$dir) for $(FUZZTIME)"; \
+			$(GO) test $$dir -run='^$$' -fuzz="^$${t}$$" -fuzztime=$(FUZZTIME) || status=1; \
+		done; \
+	done; \
+	[ $$found -eq 1 ] || echo "no fuzz targets yet (the first arrives in Phase 2)"; \
+	exit $$status

@@ -11,6 +11,9 @@
 *.out
 coverage.*
 
+# Broker data directories — broker storage must never be committed
+data/
+
 # Editors / OS
 .vscode/
 .idea/

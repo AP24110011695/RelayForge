@@ -1,0 +1,2 @@
+# The canonical repository lives in WSL/Linux; keep text files LF everywhere.
+* text=auto eol=lf
