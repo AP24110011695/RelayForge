@@ -40,8 +40,10 @@ fallback), so make targets work in any shell.
   build/test/fuzz/benchmark execution and all git commits happen here.
 - **Editing mirror**: `C:\Projects\RelayForge` on Windows
   (`/mnt/c/Projects/RelayForge` from WSL), for editing and inspection only.
-  It is refreshed from the canonical repo after each phase:
-  `cp -a ~/projects/relayforge/. /mnt/c/Projects/RelayForge/`
+  It is refreshed from the canonical repo after each phase. Git object files
+  are read-only (mode 444), so the `.git` directory must be removed before
+  copying:
+  `rm -rf /mnt/c/Projects/RelayForge/.git && cp -a ~/projects/relayforge/. /mnt/c/Projects/RelayForge/`
 - If files are edited in the Windows mirror, copy them into the canonical
   repo and re-verify before committing; commits are made from WSL only.
 
