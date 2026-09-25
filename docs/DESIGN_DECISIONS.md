@@ -59,3 +59,38 @@ Python-heavy application/ML work).
 - Dependency minimalism is the default: all Phase 1 labs ran on the stdlib
   alone, and any future dependency needs a written reason (working agreement
   in PHASE-1-PLAN).
+
+---
+
+## ADR-2: Consolidate planning into PLAN.md + IMPLEMENTATION_PLAN.md
+
+Date: 2026-09-26 · Status: accepted · Decided during: Phase 1
+
+**Context.** The original planning round produced a 15-phase ROADMAP.md and a
+per-phase PHASE-1-PLAN.md. The project direction was then re-baselined to
+exactly 10 executable phases driven end-to-end by two documents only:
+PLAN.md (master roadmap) and IMPLEMENTATION_PLAN.md (coding-agent operating
+manual), so that any future session can run "Execute Phase N" without
+per-phase planning files. The new plan also changes the Phase 1 Definition of
+Done: the repository must contain compiling, tested Go code
+(internal/version) instead of a deliberately zero-.go skeleton, and the
+Makefile gains test-race and fuzz targets.
+
+**Decision.**
+
+1. PLAN.md and IMPLEMENTATION_PLAN.md are the single authoritative planning
+   documents; ROADMAP.md and PHASE-1-PLAN.md are removed from the working
+   tree.
+2. ADR-1 phase references follow the OLD numbering: under the new 10-phase
+   plan, segments and sparse indexes land in Phase 4 (not Phase 5). ADR-1 is
+   left unedited per the convention above.
+3. ADR-1 mention of the "working agreement in PHASE-1-PLAN" now means
+   IMPLEMENTATION_PLAN.md (dependency minimalism and related rules are
+   restated there).
+
+**Consequences.**
+
+- The retired documents remain recoverable from git history (commit 07653e1
+  introduced them).
+- Future phases must not create per-phase planning files; phase scope lives
+  only in PLAN.md, decisions are appended here.
