@@ -12,13 +12,13 @@ semantics, group fencing) plus reproducible benchmarks.
 
 ## Status
 
-**Phase 1 of 10 complete — Go Foundations + Development Environment.**
+**Phase 2 of 10 complete — Networking Fundamentals + Binary Protocol Concepts.**
 
 - Verified WSL2 (Ubuntu 26.04 LTS) toolchain; see
   [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
-- Repository scaffold reconciled with the 10-phase plan: module, Makefile
-  (build / test / test-race / vet / fmt / fuzz), and the first library
-  package (`internal/version`).
+- `internal/framing`: tested and fuzzed length-prefix wire framing
+  ([docs/FRAMING.md](docs/FRAMING.md)); TCP/framing labs live in `~/rf-labs`.
+- `internal/version`: build information (first library package, Phase 1).
 - No broker behavior yet, by design. The record format and log engine start
   in Phase 3; the gRPC API in Phase 5.
 
@@ -69,7 +69,8 @@ Current layout:
 
 ```text
 PLAN.md, IMPLEMENTATION_PLAN.md   # roadmap + agent operating manual
-docs/                             # environment record, design decisions
+docs/                             # environment, framing, design decisions
+internal/framing/                 # length-prefix wire framing (tested + fuzzed)
 internal/version/                 # build information (first library package)
 ```
 
