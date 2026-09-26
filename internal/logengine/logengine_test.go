@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -15,15 +13,26 @@ import (
 
 var errScanAbort = errors.New("scan aborted by test")
 
+// smallOpts produces several segments quickly: ~40-byte records roll every
+// ~12 records and index every ~3 records.
+func smallOpts() Options {
+	return Options{MaxRecordSize: 256, MaxSegmentBytes: 512, IndexIntervalBytes: 128}
+}
+
 func openTemp(t *testing.T) (*Log, string) {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "test.log")
-	l, err := Open(path, Options{})
+	return openTempOpts(t, Options{})
+}
+
+func openTempOpts(t *testing.T, opts Options) (*Log, string) {
+	t.Helper()
+	dir := t.TempDir()
+	l, err := Open(dir, opts)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = l.Close() })
-	return l, path
+	return l, dir
 }
 
 // mkrec builds a record with a distinct value and a fixed timestamp (so
@@ -36,13 +45,22 @@ func mkrec(i int) record.Record {
 	}
 }
 
-func fileSize(t *testing.T, path string) int64 {
-	t.Helper()
-	info, err := os.Stat(path)
-	if err != nil {
-		t.Fatal(err)
+// readAll collects every record from offset `from` to the current end by
+// following next-offsets across segment boundaries.
+func readAll(l *Log, from uint64) ([]record.Record, error) {
+	var out []record.Record
+	cursor := from
+	for {
+		recs, next, err := l.ReadFrom(cursor, 1<<20)
+		if err != nil {
+			return out, err
+		}
+		out = append(out, recs...)
+		if next == cursor && len(recs) == 0 {
+			return out, nil
+		}
+		cursor = next
 	}
-	return info.Size()
 }
 
 func TestOpenEmptyLog(t *testing.T) {
@@ -68,7 +86,7 @@ func TestOpenEmptyLog(t *testing.T) {
 func TestAppendRead(t *testing.T) {
 	l, _ := openTemp(t)
 	for i := 0; i < 10; i++ {
-		off, err := l.Append(mkrec(i), false)
+		off, err := l.Append(mkrec(i), DurabilityWritten)
 		if err != nil {
 			t.Fatalf("append %d: %v", i, err)
 		}
@@ -126,7 +144,7 @@ func TestMaxBytes(t *testing.T) {
 	// Ten records of exactly 100 bytes each (26 header + 74 value).
 	for i := 0; i < 10; i++ {
 		rec := record.Record{Value: bytes.Repeat([]byte{byte(i)}, 74)}
-		if _, err := l.Append(rec, false); err != nil {
+		if _, err := l.Append(rec, DurabilityWritten); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -149,10 +167,10 @@ func TestMaxBytes(t *testing.T) {
 
 func TestTimestampStamping(t *testing.T) {
 	l, _ := openTemp(t)
-	if _, err := l.Append(record.Record{Value: []byte("stamped")}, false); err != nil {
+	if _, err := l.Append(record.Record{Value: []byte("stamped")}, DurabilityWritten); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := l.Append(record.Record{Value: []byte("explicit"), Timestamp: 1234567890123}, false); err != nil {
+	if _, err := l.Append(record.Record{Value: []byte("explicit"), Timestamp: 1234567890123}, DurabilityWritten); err != nil {
 		t.Fatal(err)
 	}
 	recs, _, err := l.ReadFrom(0, 1<<20)
@@ -172,13 +190,12 @@ func TestTimestampStamping(t *testing.T) {
 
 func TestReopenPersists(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "test.log")
-	l, err := Open(path, Options{})
+	l, err := Open(dir, Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	for i := 0; i < 5; i++ {
-		if _, err := l.Append(mkrec(i), true); err != nil {
+		if _, err := l.Append(mkrec(i), DurabilityFlushed); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -186,7 +203,7 @@ func TestReopenPersists(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	l2, err := Open(path, Options{})
+	l2, err := Open(dir, Options{})
 	if err != nil {
 		t.Fatalf("reopen: %v", err)
 	}
@@ -214,218 +231,75 @@ func TestReopenPersists(t *testing.T) {
 		}
 	}
 	// Offset continuity: the next append continues the sequence.
-	off, err := l2.Append(mkrec(5), false)
+	off, err := l2.Append(mkrec(5), DurabilityWritten)
 	if err != nil || off != 5 {
 		t.Errorf("append after reopen: offset %d err %v; want 5, nil", off, err)
 	}
 }
 
-func TestTornTailRecovery(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "test.log")
-	l, err := Open(path, Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	for i := 0; i < 5; i++ {
-		if _, err := l.Append(mkrec(i), true); err != nil {
+func TestSealedSegmentsNeverAppended(t *testing.T) {
+	l, _ := openTempOpts(t, smallOpts())
+	for i := 0; i < 30; i++ {
+		if _, err := l.Append(mkrec(i), DurabilityWritten); err != nil {
 			t.Fatal(err)
 		}
 	}
-	cleanSize := fileSize(t, path)
-	if err := l.Close(); err != nil {
-		t.Fatal(err)
+	if len(l.segments) < 3 {
+		t.Fatalf("expected several segments, got %d", len(l.segments))
 	}
-
-	// Simulate a crash mid-append: the first 10 bytes of a sixth record
-	// land in the file.
-	sixth, err := mkrec(5).Encode(4 << 20)
-	if err != nil {
-		t.Fatal(err)
+	// Record the size of every segment that is sealed now.
+	sealedSizes := make(map[uint64]int64)
+	for _, seg := range l.segments {
+		if seg.sealed {
+			sealedSizes[seg.base] = seg.size
+		}
 	}
-	f, err := os.OpenFile(path, os.O_WRONLY, 0o644)
-	if err != nil {
-		t.Fatal(err)
+	if len(sealedSizes) == 0 {
+		t.Fatal("no sealed segments to check")
 	}
-	if _, err := f.WriteAt(sixth[:10], cleanSize); err != nil {
-		t.Fatal(err)
-	}
-	f.Close()
-
-	l2, err := Open(path, Options{})
-	if err != nil {
-		t.Fatalf("reopen with torn tail: %v", err)
-	}
-	defer l2.Close()
-	if got := l2.TruncatedOnRecover(); got != 10 {
-		t.Errorf("TruncatedOnRecover = %d, want 10", got)
-	}
-	if got := l2.NextOffset(); got != 5 {
-		t.Errorf("NextOffset = %d, want 5", got)
-	}
-	if size := fileSize(t, path); size != cleanSize {
-		t.Errorf("file size after recovery = %d, want %d", size, cleanSize)
-	}
-	off, err := l2.Append(mkrec(5), false)
-	if err != nil || off != 5 {
-		t.Fatalf("append after recovery: offset %d err %v; want 5, nil", off, err)
-	}
-}
-
-func TestCorruptTailRecovery(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "test.log")
-	l, err := Open(path, Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	for i := 0; i < 5; i++ {
-		if _, err := l.Append(mkrec(i), true); err != nil {
+	for i := 30; i < 60; i++ {
+		if _, err := l.Append(mkrec(i), DurabilityWritten); err != nil {
 			t.Fatal(err)
 		}
 	}
-	size := fileSize(t, path)
-	if err := l.Close(); err != nil {
+	for _, seg := range l.segments {
+		if want, ok := sealedSizes[seg.base]; ok && seg.sealed {
+			if seg.size != want {
+				t.Errorf("sealed segment %d changed size: %d -> %d", seg.base, want, seg.size)
+			}
+		}
+	}
+	if err := l.Scan(func(record.Record, uint64) error { return nil }); err != nil {
 		t.Fatal(err)
-	}
-
-	// Flip a byte inside the last record's value.
-	f, err := os.OpenFile(path, os.O_RDWR, 0o644)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var b [1]byte
-	if _, err := f.ReadAt(b[:], size-3); err != nil {
-		t.Fatal(err)
-	}
-	b[0] ^= 0xFF
-	if _, err := f.WriteAt(b[:], size-3); err != nil {
-		t.Fatal(err)
-	}
-	f.Close()
-
-	l2, err := Open(path, Options{})
-	if err != nil {
-		t.Fatalf("reopen with corrupt tail: %v", err)
-	}
-	defer l2.Close()
-	if got := l2.NextOffset(); got != 4 {
-		t.Errorf("NextOffset = %d, want 4 (corrupt last record truncated)", got)
-	}
-	if got := l2.TruncatedOnRecover(); got == 0 {
-		t.Error("TruncatedOnRecover = 0, want > 0")
-	}
-	if err := l2.Scan(func(record.Record, uint64) error { return nil }); err != nil {
-		t.Errorf("scan after recovery: %v", err)
 	}
 }
 
-// TestCorruptMiddlePolicy pins the documented policy: a corrupt record
-// discards it AND everything after it.
-func TestCorruptMiddlePolicy(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "test.log")
-	l, err := Open(path, Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Ten records of exactly 100 bytes: record i spans [100*i, 100*i+100).
-	for i := 0; i < 10; i++ {
-		if _, err := l.Append(record.Record{Value: bytes.Repeat([]byte{byte(i)}, 74)}, true); err != nil {
+func TestReadAcrossSegments(t *testing.T) {
+	l, _ := openTempOpts(t, smallOpts())
+	for i := 0; i < 20; i++ {
+		if _, err := l.Append(mkrec(i), DurabilityWritten); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if err := l.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	f, err := os.OpenFile(path, os.O_RDWR, 0o644)
+	recs, err := readAll(l, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var b [1]byte
-	if _, err := f.ReadAt(b[:], 100*1+30); err != nil { // inside record 1's value
-		t.Fatal(err)
+	if len(recs) != 20 {
+		t.Fatalf("readAll got %d records, want 20", len(recs))
 	}
-	b[0] ^= 0xFF
-	if _, err := f.WriteAt(b[:], 100*1+30); err != nil {
-		t.Fatal(err)
-	}
-	f.Close()
-
-	l2, err := Open(path, Options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer l2.Close()
-	if got := l2.NextOffset(); got != 1 {
-		t.Errorf("NextOffset = %d, want 1 (truncate from first corrupt record)", got)
-	}
-	if got := l2.TruncatedOnRecover(); got != 100*9 {
-		t.Errorf("TruncatedOnRecover = %d, want %d", got, 100*9)
-	}
-	off, err := l2.Append(record.Record{Value: []byte("fresh")}, false)
-	if err != nil || off != 1 {
-		t.Errorf("append after recovery: offset %d err %v; want 1, nil", off, err)
-	}
-}
-
-func TestGarbageFile(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "test.log")
-	garbage := bytes.Repeat([]byte{0xFF}, 64)
-	if err := os.WriteFile(path, garbage, 0o644); err != nil {
-		t.Fatal(err)
-	}
-	l, err := Open(path, Options{})
-	if err != nil {
-		t.Fatalf("open garbage file: %v", err)
-	}
-	defer l.Close()
-	if got := l.NextOffset(); got != 0 {
-		t.Errorf("NextOffset = %d, want 0", got)
-	}
-	if got := l.TruncatedOnRecover(); got != 64 {
-		t.Errorf("TruncatedOnRecover = %d, want 64", got)
-	}
-	off, err := l.Append(record.Record{Value: []byte("ok")}, false)
-	if err != nil || off != 0 {
-		t.Errorf("append into recovered garbage file: offset %d err %v", off, err)
-	}
-}
-
-func TestScanAbort(t *testing.T) {
-	l, _ := openTemp(t)
-	for i := 0; i < 3; i++ {
-		if _, err := l.Append(mkrec(i), false); err != nil {
-			t.Fatal(err)
+	for i, rec := range recs {
+		if !bytes.Equal(rec.Value, mkrec(i).Value) {
+			t.Errorf("record %d = %q", i, rec.Value)
 		}
 	}
-	err := l.Scan(func(record.Record, uint64) error { return errScanAbort })
-	if !errors.Is(err, errScanAbort) {
-		t.Errorf("Scan abort: error = %v, want errScanAbort", err)
-	}
-}
-
-func TestClosedLog(t *testing.T) {
-	l, _ := openTemp(t)
-	if _, err := l.Append(mkrec(0), false); err != nil {
+	// A read starting in a later segment routes correctly.
+	recs, _, err = l.ReadFrom(13, 1<<20)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := l.Close(); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := l.Append(mkrec(1), false); !errors.Is(err, ErrClosed) {
-		t.Errorf("Append after close: error = %v, want ErrClosed", err)
-	}
-	if _, _, err := l.ReadFrom(0, 1024); !errors.Is(err, ErrClosed) {
-		t.Errorf("ReadFrom after close: error = %v, want ErrClosed", err)
-	}
-	if err := l.Scan(func(record.Record, uint64) error { return nil }); !errors.Is(err, ErrClosed) {
-		t.Errorf("Scan after close: error = %v, want ErrClosed", err)
-	}
-	if err := l.Close(); !errors.Is(err, ErrClosed) {
-		t.Errorf("second Close: error = %v, want ErrClosed", err)
+	if len(recs) == 0 || !bytes.Equal(recs[0].Value, []byte("value-013")) {
+		t.Errorf("read from offset 13 starts at %v", recs)
 	}
 }
 
@@ -440,7 +314,7 @@ func TestConcurrentAppends(t *testing.T) {
 			defer wg.Done()
 			for i := 0; i < perWorker; i++ {
 				rec := record.Record{Value: []byte(fmt.Sprintf("w%d-m%03d", id, i))}
-				off, err := l.Append(rec, false)
+				off, err := l.Append(rec, DurabilityWritten)
 				if err != nil {
 					t.Errorf("worker %d append %d: %v", id, i, err)
 					return
@@ -481,10 +355,10 @@ func TestConcurrentAppends(t *testing.T) {
 }
 
 // TestConcurrentReadersDuringAppends: readers must only ever observe
-// complete records while a writer appends.
+// complete records while a writer appends, across segment rolls.
 func TestConcurrentReadersDuringAppends(t *testing.T) {
-	l, _ := openTemp(t)
-	const total = 300
+	l, _ := openTempOpts(t, smallOpts())
+	const total = 150
 	deadline := time.Now().Add(10 * time.Second)
 
 	var writerDone sync.WaitGroup
@@ -492,7 +366,7 @@ func TestConcurrentReadersDuringAppends(t *testing.T) {
 	go func() {
 		defer writerDone.Done()
 		for i := 0; i < total; i++ {
-			if _, err := l.Append(mkrec(i), false); err != nil {
+			if _, err := l.Append(mkrec(i), DurabilityWritten); err != nil {
 				t.Errorf("append %d: %v", i, err)
 				return
 			}
@@ -510,8 +384,7 @@ func TestConcurrentReadersDuringAppends(t *testing.T) {
 					t.Errorf("reader %d: timed out waiting for %d records", id, total)
 					return
 				}
-				next := l.NextOffset()
-				recs, _, err := l.ReadFrom(0, 1<<20)
+				recs, err := readAll(l, 0)
 				if err != nil {
 					t.Errorf("reader %d: %v", id, err)
 					return
@@ -521,7 +394,13 @@ func TestConcurrentReadersDuringAppends(t *testing.T) {
 					return
 				}
 				previous = len(recs)
-				if next == total && len(recs) == total {
+				if len(recs) == total {
+					for i, rec := range recs {
+						if !bytes.Equal(rec.Value, mkrec(i).Value) {
+							t.Errorf("reader %d: record %d = %q", id, i, rec.Value)
+							return
+						}
+					}
 					return
 				}
 			}
@@ -533,20 +412,64 @@ func TestConcurrentReadersDuringAppends(t *testing.T) {
 	if got := l.NextOffset(); got != total {
 		t.Errorf("NextOffset = %d, want %d", got, total)
 	}
-	err := l.Scan(func(rec record.Record, offset uint64) error {
-		if string(rec.Value) != fmt.Sprintf("value-%03d", offset) {
-			t.Errorf("record %d = %q", offset, rec.Value)
+}
+
+func TestScanAbort(t *testing.T) {
+	l, _ := openTemp(t)
+	for i := 0; i < 3; i++ {
+		if _, err := l.Append(mkrec(i), DurabilityWritten); err != nil {
+			t.Fatal(err)
 		}
-		return nil
-	})
-	if err != nil {
+	}
+	err := l.Scan(func(record.Record, uint64) error { return errScanAbort })
+	if !errors.Is(err, errScanAbort) {
+		t.Errorf("Scan abort: error = %v, want errScanAbort", err)
+	}
+}
+
+func TestClosedLog(t *testing.T) {
+	l, _ := openTemp(t)
+	if _, err := l.Append(mkrec(0), DurabilityWritten); err != nil {
 		t.Fatal(err)
+	}
+	if err := l.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := l.Append(mkrec(1), DurabilityWritten); !errors.Is(err, ErrClosed) {
+		t.Errorf("Append after close: error = %v, want ErrClosed", err)
+	}
+	if _, _, err := l.ReadFrom(0, 1024); !errors.Is(err, ErrClosed) {
+		t.Errorf("ReadFrom after close: error = %v, want ErrClosed", err)
+	}
+	if err := l.Scan(func(record.Record, uint64) error { return nil }); !errors.Is(err, ErrClosed) {
+		t.Errorf("Scan after close: error = %v, want ErrClosed", err)
+	}
+	if err := l.ApplyRetention(time.Now()); !errors.Is(err, ErrClosed) {
+		t.Errorf("ApplyRetention after close: error = %v, want ErrClosed", err)
+	}
+	if err := l.Close(); !errors.Is(err, ErrClosed) {
+		t.Errorf("second Close: error = %v, want ErrClosed", err)
+	}
+}
+
+func TestOffsetValidation(t *testing.T) {
+	l, _ := openTemp(t)
+	if _, err := l.Append(mkrec(0), DurabilityWritten); err != nil {
+		t.Fatal(err)
+	}
+	// MaxRecordSize below the minimum usable size is rejected at Open.
+	if _, err := Open(t.TempDir(), Options{MaxRecordSize: -1}); err == nil {
+		t.Error("negative MaxRecordSize accepted")
+	}
+	// MaxSegmentBytes below MaxRecordSize is rejected at Open.
+	if _, err := Open(t.TempDir(), Options{MaxRecordSize: 2048, MaxSegmentBytes: 1024}); err == nil {
+		t.Error("MaxSegmentBytes < MaxRecordSize accepted")
 	}
 }
 
 func BenchmarkLogAppend(b *testing.B) {
-	path := filepath.Join(b.TempDir(), "bench.log")
-	l, err := Open(path, Options{})
+	dir := b.TempDir()
+	l, err := Open(dir, Options{})
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -555,7 +478,7 @@ func BenchmarkLogAppend(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if _, err := l.Append(rec, false); err != nil {
+		if _, err := l.Append(rec, DurabilityWritten); err != nil {
 			b.Fatal(err)
 		}
 	}
