@@ -22,17 +22,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RelayForge_Produce_FullMethodName       = "/relayforge.v1.RelayForge/Produce"
-	RelayForge_Fetch_FullMethodName         = "/relayforge.v1.RelayForge/Fetch"
-	RelayForge_CreateTopic_FullMethodName   = "/relayforge.v1.RelayForge/CreateTopic"
-	RelayForge_ListTopics_FullMethodName    = "/relayforge.v1.RelayForge/ListTopics"
-	RelayForge_DescribeTopic_FullMethodName = "/relayforge.v1.RelayForge/DescribeTopic"
-	RelayForge_JoinGroup_FullMethodName     = "/relayforge.v1.RelayForge/JoinGroup"
-	RelayForge_SyncGroup_FullMethodName     = "/relayforge.v1.RelayForge/SyncGroup"
-	RelayForge_Heartbeat_FullMethodName     = "/relayforge.v1.RelayForge/Heartbeat"
-	RelayForge_CommitOffset_FullMethodName  = "/relayforge.v1.RelayForge/CommitOffset"
-	RelayForge_GetOffsets_FullMethodName    = "/relayforge.v1.RelayForge/GetOffsets"
-	RelayForge_DescribeGroup_FullMethodName = "/relayforge.v1.RelayForge/DescribeGroup"
+	RelayForge_Produce_FullMethodName        = "/relayforge.v1.RelayForge/Produce"
+	RelayForge_Fetch_FullMethodName          = "/relayforge.v1.RelayForge/Fetch"
+	RelayForge_CreateTopic_FullMethodName    = "/relayforge.v1.RelayForge/CreateTopic"
+	RelayForge_ListTopics_FullMethodName     = "/relayforge.v1.RelayForge/ListTopics"
+	RelayForge_DescribeTopic_FullMethodName  = "/relayforge.v1.RelayForge/DescribeTopic"
+	RelayForge_JoinGroup_FullMethodName      = "/relayforge.v1.RelayForge/JoinGroup"
+	RelayForge_SyncGroup_FullMethodName      = "/relayforge.v1.RelayForge/SyncGroup"
+	RelayForge_Heartbeat_FullMethodName      = "/relayforge.v1.RelayForge/Heartbeat"
+	RelayForge_CommitOffset_FullMethodName   = "/relayforge.v1.RelayForge/CommitOffset"
+	RelayForge_GetOffsets_FullMethodName     = "/relayforge.v1.RelayForge/GetOffsets"
+	RelayForge_DescribeGroup_FullMethodName  = "/relayforge.v1.RelayForge/DescribeGroup"
+	RelayForge_ReplicateFetch_FullMethodName = "/relayforge.v1.RelayForge/ReplicateFetch"
 )
 
 // RelayForgeClient is the client API for RelayForge service.
@@ -50,6 +51,7 @@ type RelayForgeClient interface {
 	CommitOffset(ctx context.Context, in *CommitOffsetRequest, opts ...grpc.CallOption) (*CommitOffsetResponse, error)
 	GetOffsets(ctx context.Context, in *GetOffsetsRequest, opts ...grpc.CallOption) (*GetOffsetsResponse, error)
 	DescribeGroup(ctx context.Context, in *DescribeGroupRequest, opts ...grpc.CallOption) (*DescribeGroupResponse, error)
+	ReplicateFetch(ctx context.Context, in *ReplicateFetchRequest, opts ...grpc.CallOption) (*ReplicateFetchResponse, error)
 }
 
 type relayForgeClient struct {
@@ -170,6 +172,16 @@ func (c *relayForgeClient) DescribeGroup(ctx context.Context, in *DescribeGroupR
 	return out, nil
 }
 
+func (c *relayForgeClient) ReplicateFetch(ctx context.Context, in *ReplicateFetchRequest, opts ...grpc.CallOption) (*ReplicateFetchResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReplicateFetchResponse)
+	err := c.cc.Invoke(ctx, RelayForge_ReplicateFetch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RelayForgeServer is the server API for RelayForge service.
 // All implementations must embed UnimplementedRelayForgeServer
 // for forward compatibility.
@@ -185,6 +197,7 @@ type RelayForgeServer interface {
 	CommitOffset(context.Context, *CommitOffsetRequest) (*CommitOffsetResponse, error)
 	GetOffsets(context.Context, *GetOffsetsRequest) (*GetOffsetsResponse, error)
 	DescribeGroup(context.Context, *DescribeGroupRequest) (*DescribeGroupResponse, error)
+	ReplicateFetch(context.Context, *ReplicateFetchRequest) (*ReplicateFetchResponse, error)
 	mustEmbedUnimplementedRelayForgeServer()
 }
 
@@ -227,6 +240,9 @@ func (UnimplementedRelayForgeServer) GetOffsets(context.Context, *GetOffsetsRequ
 }
 func (UnimplementedRelayForgeServer) DescribeGroup(context.Context, *DescribeGroupRequest) (*DescribeGroupResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DescribeGroup not implemented")
+}
+func (UnimplementedRelayForgeServer) ReplicateFetch(context.Context, *ReplicateFetchRequest) (*ReplicateFetchResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReplicateFetch not implemented")
 }
 func (UnimplementedRelayForgeServer) mustEmbedUnimplementedRelayForgeServer() {}
 func (UnimplementedRelayForgeServer) testEmbeddedByValue()                    {}
@@ -447,6 +463,24 @@ func _RelayForge_DescribeGroup_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RelayForge_ReplicateFetch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReplicateFetchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).ReplicateFetch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_ReplicateFetch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).ReplicateFetch(ctx, req.(*ReplicateFetchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RelayForge_ServiceDesc is the grpc.ServiceDesc for RelayForge service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -497,6 +531,10 @@ var RelayForge_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DescribeGroup",
 			Handler:    _RelayForge_DescribeGroup_Handler,
+		},
+		{
+			MethodName: "ReplicateFetch",
+			Handler:    _RelayForge_ReplicateFetch_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

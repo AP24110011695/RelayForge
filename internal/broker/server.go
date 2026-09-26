@@ -116,7 +116,7 @@ func toStatus(err error) error {
 		return status.Error(codes.FailedPrecondition, "FENCED: "+err.Error())
 	case errors.Is(err, group.ErrUnknownGroup), errors.Is(err, group.ErrUnknownMemberID), errors.Is(err, group.ErrUnknownTopic):
 		return status.Error(codes.NotFound, err.Error())
-	case errors.Is(err, ErrPartitionFailed), errors.Is(err, ErrClosed), errors.Is(err, logengine.ErrClosed):
+	case errors.Is(err, ErrPartitionFailed), errors.Is(err, ErrNotLeader), errors.Is(err, ErrClosed), errors.Is(err, logengine.ErrClosed):
 		return status.Error(codes.Unavailable, err.Error())
 	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, context.Canceled):
 		return status.FromContextError(err).Err()
@@ -213,6 +213,18 @@ func (s *server) DescribeGroup(ctx context.Context, req *relayforgev1.DescribeGr
 		}
 	}
 	return &relayforgev1.DescribeGroupResponse{GenerationId: generation, Members: out}, nil
+}
+
+func (s *server) ReplicateFetch(ctx context.Context, req *relayforgev1.ReplicateFetchRequest) (*relayforgev1.ReplicateFetchResponse, error) {
+	recs, next, hw, err := s.b.Fetch(ctx, req.GetTopic(), req.GetPartition(), req.GetFromOffset(), HardFetchMaxBytesCap, 0)
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	out := make([]*relayforgev1.FetchedRecord, len(recs))
+	for i, r := range recs {
+		out[i] = &relayforgev1.FetchedRecord{Offset: r.Offset, Key: r.Key, Value: r.Value, TimestampMs: r.Timestamp}
+	}
+	return &relayforgev1.ReplicateFetchResponse{Records: out, NextOffset: next, HighWatermark: hw}, nil
 }
 
 // sortedPartitions returns the assigned partitions in ascending order.

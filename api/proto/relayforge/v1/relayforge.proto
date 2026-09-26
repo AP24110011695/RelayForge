@@ -74,6 +74,7 @@ service RelayForge {
   rpc CommitOffset(CommitOffsetRequest) returns (CommitOffsetResponse);
   rpc GetOffsets(GetOffsetsRequest) returns (GetOffsetsResponse);
   rpc DescribeGroup(DescribeGroupRequest) returns (DescribeGroupResponse);
+  rpc ReplicateFetch(ReplicateFetchRequest) returns (ReplicateFetchResponse);
 }
 
 // --- Consumer groups (Phase 7) ---
@@ -159,6 +160,24 @@ message GroupMember {
 message DescribeGroupResponse {
   int64 generation_id = 1;
   repeated GroupMember members = 2;
+}
+
+// --- Replication (Phase 10) ---
+//
+// Internal RPC used by a follower broker to pull records from its leader
+// (static placement, async replication — see docs/REPLICATION.md). Not a
+// client-facing API.
+
+message ReplicateFetchRequest {
+  string topic = 1;
+  int32 partition = 2;
+  uint64 from_offset = 3;
+}
+
+message ReplicateFetchResponse {
+  repeated FetchedRecord records = 1;
+  uint64 next_offset = 2;
+  uint64 high_watermark = 3;
 }
 
 message CreateTopicRequest {

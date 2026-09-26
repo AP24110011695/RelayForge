@@ -22,10 +22,18 @@ import (
 	"relayforge/internal/version"
 )
 
+func replicaCfg(addr string) *broker.Replication {
+	if addr == "" {
+		return nil
+	}
+	return &broker.Replication{PeerAddr: addr}
+}
+
 func main() {
 	addr := flag.String("addr", ":7000", "gRPC listen address")
 	adminAddr := flag.String("admin-addr", ":7001", "admin HTTP address (/metrics, /debug/pprof, /healthz)")
 	dataDir := flag.String("data-dir", "data", "broker data directory")
+	replicaOf := flag.String("replica-of", "", "run as a replication FOLLOWER of this leader address (omit to run standalone/leader)")
 	maxRecordSize := flag.Int("max-record-size", 0, "max full record size in bytes (0 = engine default)")
 	logLevel := flag.String("log-level", "info", "log level: debug, info, warn, error")
 	showVersion := flag.Bool("version", false, "print version and exit")
@@ -53,7 +61,12 @@ func main() {
 	registry := prometheus.NewRegistry()
 	metrics := observability.New(registry)
 
-	b, err := broker.Open(broker.Options{DataDir: *dataDir, MaxRecordSize: *maxRecordSize, Metrics: metrics})
+	b, err := broker.Open(broker.Options{
+		DataDir:       *dataDir,
+		MaxRecordSize: *maxRecordSize,
+		Metrics:       metrics,
+		Replication:   replicaCfg(*replicaOf),
+	})
 	if err != nil {
 		log.Error("open broker", "error", err)
 		os.Exit(1)

@@ -33,6 +33,8 @@ type Metrics struct {
 	Commits        *prometheus.CounterVec // result=ok|fenced|error
 	GroupMembers   *prometheus.GaugeVec   // group
 	RecoveryBytes  prometheus.Gauge       // bytes truncated by the last Open
+	ReplicationLag *prometheus.GaugeVec   // topic, partition (follower mode)
+	ReplicationErr prometheus.Counter     // follower fetch errors
 	rpcRequests    *prometheus.CounterVec // method, code
 	rpcDuration    *prometheus.HistogramVec
 }
@@ -90,6 +92,14 @@ func New(reg prometheus.Registerer) *Metrics {
 		RecoveryBytes: f.NewGauge(prometheus.GaugeOpts{
 			Name: "relayforge_recovery_truncated_bytes",
 			Help: "Bytes discarded by the log recovery at the last broker start.",
+		}),
+		ReplicationLag: f.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "relayforge_replication_lag",
+			Help: "Follower distance from the leader's log end, per topic/partition.",
+		}, []string{"topic", "partition"}),
+		ReplicationErr: f.NewCounter(prometheus.CounterOpts{
+			Name: "relayforge_replication_errors_total",
+			Help: "Follower replication fetch failures.",
 		}),
 		rpcRequests: f.NewCounterVec(prometheus.CounterOpts{
 			Name: "relayforge_rpc_requests_total",
@@ -180,6 +190,19 @@ func (m *Metrics) MembersObs(group string, members int) {
 func (m *Metrics) RecoveryObs(bytes int64) {
 	if m != nil {
 		m.RecoveryBytes.Set(float64(bytes))
+	}
+}
+
+// ReplicationLagObs sets the follower lag gauge for a partition.
+func (m *Metrics) ReplicationLagObs(topic string, partition int32, lag uint64) {
+	if m != nil {
+		m.ReplicationLag.WithLabelValues(topic, partitionLabel(partition)).Set(float64(lag))
+	}
+}
+
+func (m *Metrics) ReplicationErrorInc() {
+	if m != nil {
+		m.ReplicationErr.Inc()
 	}
 }
 

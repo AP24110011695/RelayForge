@@ -12,18 +12,34 @@ semantics, group fencing) plus reproducible benchmarks.
 
 ## Status
 
-**Phase 4 of 10 complete — Durability + Crash Recovery + Segments + Indexes + Retention.**
+**Phase 5–10 of 10 complete — MVP (Phases 5–9) and the Phase 10 replication
+fallback boundary.**
 
-- Verified WSL2 (Ubuntu 26.04 LTS) toolchain; see
-  [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
-- `internal/logengine`: segment-set log engine — rolling segments with
-  sparse indexes, the durability ladder (`None`/`Written`/`Flushed`), crash
-  recovery to the longest valid prefix, retention, and a SIGKILL crash
-  harness ([docs/STORAGE.md](docs/STORAGE.md),
-  [docs/GUARANTEES.md](docs/GUARANTEES.md)).
-- `internal/record`: record format v1 (golden + fuzz tested,
-  [docs/RECORD_FORMAT.md](docs/RECORD_FORMAT.md)).
-- No broker behavior yet, by design. The gRPC API arrives in Phase 5.
+- **Broker (Phase 5)**: unary gRPC/protobuf API (Produce/Fetch with ack
+  modes, status mapping, health, interceptors), `rfbroker` + `relayctl`
+  ([docs/PROTOCOL.md](docs/PROTOCOL.md)).
+- **Topics & partitions (Phase 6)**: fixed partition counts, FNV-1a key
+  routing + round-robin, per-partition bounded queues with enforced
+  backpressure, writer-panic containment, CRC-protected metadata
+  ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
+- **Consumer groups (Phase 7)**: durable per-group offset logs, generation
+  fencing persisted across restarts, session-timeout membership, reference
+  consumer (`relayctl consume`).
+- **Observability (Phase 8)**: Prometheus metrics + consumer-lag collector,
+  admin server (`/metrics`, pprof, `/healthz`), failure matrix
+  ([docs/OBSERVABILITY.md](docs/OBSERVABILITY.md),
+  [docs/FAILURE_MATRIX.md](docs/FAILURE_MATRIX.md)).
+- **Benchmarks (Phase 9)**: `rfbench` harness, recorded results +
+  profile-driven optimization loop
+  ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)).
+- **Replication (Phase 10)**: async single-follower replication, manual
+  failover with persisted epochs — the documented **fallback boundary**,
+  not consensus/HA ([docs/REPLICATION.md](docs/REPLICATION.md),
+  [docs/LIMITATIONS.md](docs/LIMITATIONS.md)).
+- Demo walkthrough: [docs/DEMO.md](docs/DEMO.md).
+
+Authoritative documents: [PLAN.md](PLAN.md) (10-phase roadmap) and
+[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) (agent operating manual).
 
 Authoritative documents:
 

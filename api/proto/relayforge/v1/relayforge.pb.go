@@ -1261,6 +1261,126 @@ func (x *DescribeGroupResponse) GetMembers() []*GroupMember {
 	return nil
 }
 
+type ReplicateFetchRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Topic         string                 `protobuf:"bytes,1,opt,name=topic,proto3" json:"topic,omitempty"`
+	Partition     int32                  `protobuf:"varint,2,opt,name=partition,proto3" json:"partition,omitempty"`
+	FromOffset    uint64                 `protobuf:"varint,3,opt,name=from_offset,json=fromOffset,proto3" json:"from_offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplicateFetchRequest) Reset() {
+	*x = ReplicateFetchRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplicateFetchRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplicateFetchRequest) ProtoMessage() {}
+
+func (x *ReplicateFetchRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplicateFetchRequest.ProtoReflect.Descriptor instead.
+func (*ReplicateFetchRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ReplicateFetchRequest) GetTopic() string {
+	if x != nil {
+		return x.Topic
+	}
+	return ""
+}
+
+func (x *ReplicateFetchRequest) GetPartition() int32 {
+	if x != nil {
+		return x.Partition
+	}
+	return 0
+}
+
+func (x *ReplicateFetchRequest) GetFromOffset() uint64 {
+	if x != nil {
+		return x.FromOffset
+	}
+	return 0
+}
+
+type ReplicateFetchResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Records       []*FetchedRecord       `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
+	NextOffset    uint64                 `protobuf:"varint,2,opt,name=next_offset,json=nextOffset,proto3" json:"next_offset,omitempty"`
+	HighWatermark uint64                 `protobuf:"varint,3,opt,name=high_watermark,json=highWatermark,proto3" json:"high_watermark,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplicateFetchResponse) Reset() {
+	*x = ReplicateFetchResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplicateFetchResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplicateFetchResponse) ProtoMessage() {}
+
+func (x *ReplicateFetchResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplicateFetchResponse.ProtoReflect.Descriptor instead.
+func (*ReplicateFetchResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ReplicateFetchResponse) GetRecords() []*FetchedRecord {
+	if x != nil {
+		return x.Records
+	}
+	return nil
+}
+
+func (x *ReplicateFetchResponse) GetNextOffset() uint64 {
+	if x != nil {
+		return x.NextOffset
+	}
+	return 0
+}
+
+func (x *ReplicateFetchResponse) GetHighWatermark() uint64 {
+	if x != nil {
+		return x.HighWatermark
+	}
+	return 0
+}
+
 type CreateTopicRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -1272,7 +1392,7 @@ type CreateTopicRequest struct {
 
 func (x *CreateTopicRequest) Reset() {
 	*x = CreateTopicRequest{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[21]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1284,7 +1404,7 @@ func (x *CreateTopicRequest) String() string {
 func (*CreateTopicRequest) ProtoMessage() {}
 
 func (x *CreateTopicRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[21]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1297,7 +1417,7 @@ func (x *CreateTopicRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTopicRequest.ProtoReflect.Descriptor instead.
 func (*CreateTopicRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{21}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CreateTopicRequest) GetName() string {
@@ -1322,7 +1442,7 @@ type CreateTopicResponse struct {
 
 func (x *CreateTopicResponse) Reset() {
 	*x = CreateTopicResponse{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[22]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1334,7 +1454,7 @@ func (x *CreateTopicResponse) String() string {
 func (*CreateTopicResponse) ProtoMessage() {}
 
 func (x *CreateTopicResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[22]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1347,7 +1467,7 @@ func (x *CreateTopicResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTopicResponse.ProtoReflect.Descriptor instead.
 func (*CreateTopicResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{22}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{24}
 }
 
 type TopicInfo struct {
@@ -1360,7 +1480,7 @@ type TopicInfo struct {
 
 func (x *TopicInfo) Reset() {
 	*x = TopicInfo{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[23]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1372,7 +1492,7 @@ func (x *TopicInfo) String() string {
 func (*TopicInfo) ProtoMessage() {}
 
 func (x *TopicInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[23]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1385,7 +1505,7 @@ func (x *TopicInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TopicInfo.ProtoReflect.Descriptor instead.
 func (*TopicInfo) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{23}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *TopicInfo) GetName() string {
@@ -1410,7 +1530,7 @@ type ListTopicsRequest struct {
 
 func (x *ListTopicsRequest) Reset() {
 	*x = ListTopicsRequest{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[24]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1422,7 +1542,7 @@ func (x *ListTopicsRequest) String() string {
 func (*ListTopicsRequest) ProtoMessage() {}
 
 func (x *ListTopicsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[24]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1435,7 +1555,7 @@ func (x *ListTopicsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTopicsRequest.ProtoReflect.Descriptor instead.
 func (*ListTopicsRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{24}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{26}
 }
 
 type ListTopicsResponse struct {
@@ -1447,7 +1567,7 @@ type ListTopicsResponse struct {
 
 func (x *ListTopicsResponse) Reset() {
 	*x = ListTopicsResponse{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[25]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1459,7 +1579,7 @@ func (x *ListTopicsResponse) String() string {
 func (*ListTopicsResponse) ProtoMessage() {}
 
 func (x *ListTopicsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[25]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1472,7 +1592,7 @@ func (x *ListTopicsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTopicsResponse.ProtoReflect.Descriptor instead.
 func (*ListTopicsResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{25}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ListTopicsResponse) GetTopics() []*TopicInfo {
@@ -1491,7 +1611,7 @@ type DescribeTopicRequest struct {
 
 func (x *DescribeTopicRequest) Reset() {
 	*x = DescribeTopicRequest{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[26]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1503,7 +1623,7 @@ func (x *DescribeTopicRequest) String() string {
 func (*DescribeTopicRequest) ProtoMessage() {}
 
 func (x *DescribeTopicRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[26]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1516,7 +1636,7 @@ func (x *DescribeTopicRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeTopicRequest.ProtoReflect.Descriptor instead.
 func (*DescribeTopicRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{26}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *DescribeTopicRequest) GetName() string {
@@ -1535,7 +1655,7 @@ type DescribeTopicResponse struct {
 
 func (x *DescribeTopicResponse) Reset() {
 	*x = DescribeTopicResponse{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[27]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1547,7 +1667,7 @@ func (x *DescribeTopicResponse) String() string {
 func (*DescribeTopicResponse) ProtoMessage() {}
 
 func (x *DescribeTopicResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[27]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1560,7 +1680,7 @@ func (x *DescribeTopicResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeTopicResponse.ProtoReflect.Descriptor instead.
 func (*DescribeTopicResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{27}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *DescribeTopicResponse) GetTopic() *TopicInfo {
@@ -1657,7 +1777,17 @@ const file_api_proto_relayforge_v1_relayforge_proto_rawDesc = "" +
 	"assignment\"r\n" +
 	"\x15DescribeGroupResponse\x12#\n" +
 	"\rgeneration_id\x18\x01 \x01(\x03R\fgenerationId\x124\n" +
-	"\amembers\x18\x02 \x03(\v2\x1a.relayforge.v1.GroupMemberR\amembers\"Q\n" +
+	"\amembers\x18\x02 \x03(\v2\x1a.relayforge.v1.GroupMemberR\amembers\"l\n" +
+	"\x15ReplicateFetchRequest\x12\x14\n" +
+	"\x05topic\x18\x01 \x01(\tR\x05topic\x12\x1c\n" +
+	"\tpartition\x18\x02 \x01(\x05R\tpartition\x12\x1f\n" +
+	"\vfrom_offset\x18\x03 \x01(\x04R\n" +
+	"fromOffset\"\x98\x01\n" +
+	"\x16ReplicateFetchResponse\x126\n" +
+	"\arecords\x18\x01 \x03(\v2\x1c.relayforge.v1.FetchedRecordR\arecords\x12\x1f\n" +
+	"\vnext_offset\x18\x02 \x01(\x04R\n" +
+	"nextOffset\x12%\n" +
+	"\x0ehigh_watermark\x18\x03 \x01(\x04R\rhighWatermark\"Q\n" +
 	"\x12CreateTopicRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12'\n" +
 	"\x0fpartition_count\x18\x02 \x01(\x05R\x0epartitionCount\"\x15\n" +
@@ -1676,7 +1806,7 @@ const file_api_proto_relayforge_v1_relayforge_proto_rawDesc = "" +
 	"\x14ACK_MODE_UNSPECIFIED\x10\x00\x12\x11\n" +
 	"\rACK_MODE_NONE\x10\x01\x12\x14\n" +
 	"\x10ACK_MODE_WRITTEN\x10\x02\x12\x14\n" +
-	"\x10ACK_MODE_FLUSHED\x10\x032\x97\a\n" +
+	"\x10ACK_MODE_FLUSHED\x10\x032\xf6\a\n" +
 	"\n" +
 	"RelayForge\x12H\n" +
 	"\aProduce\x12\x1d.relayforge.v1.ProduceRequest\x1a\x1e.relayforge.v1.ProduceResponse\x12B\n" +
@@ -1691,7 +1821,8 @@ const file_api_proto_relayforge_v1_relayforge_proto_rawDesc = "" +
 	"\fCommitOffset\x12\".relayforge.v1.CommitOffsetRequest\x1a#.relayforge.v1.CommitOffsetResponse\x12Q\n" +
 	"\n" +
 	"GetOffsets\x12 .relayforge.v1.GetOffsetsRequest\x1a!.relayforge.v1.GetOffsetsResponse\x12Z\n" +
-	"\rDescribeGroup\x12#.relayforge.v1.DescribeGroupRequest\x1a$.relayforge.v1.DescribeGroupResponseB1Z/relayforge/api/proto/relayforge/v1;relayforgev1b\x06proto3"
+	"\rDescribeGroup\x12#.relayforge.v1.DescribeGroupRequest\x1a$.relayforge.v1.DescribeGroupResponse\x12]\n" +
+	"\x0eReplicateFetch\x12$.relayforge.v1.ReplicateFetchRequest\x1a%.relayforge.v1.ReplicateFetchResponseB1Z/relayforge/api/proto/relayforge/v1;relayforgev1b\x06proto3"
 
 var (
 	file_api_proto_relayforge_v1_relayforge_proto_rawDescOnce sync.Once
@@ -1706,37 +1837,39 @@ func file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP() []byte {
 }
 
 var file_api_proto_relayforge_v1_relayforge_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_proto_relayforge_v1_relayforge_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_api_proto_relayforge_v1_relayforge_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_api_proto_relayforge_v1_relayforge_proto_goTypes = []any{
-	(AckMode)(0),                  // 0: relayforge.v1.AckMode
-	(*Message)(nil),               // 1: relayforge.v1.Message
-	(*ProduceRequest)(nil),        // 2: relayforge.v1.ProduceRequest
-	(*ProduceResponse)(nil),       // 3: relayforge.v1.ProduceResponse
-	(*FetchRequest)(nil),          // 4: relayforge.v1.FetchRequest
-	(*FetchedRecord)(nil),         // 5: relayforge.v1.FetchedRecord
-	(*FetchResponse)(nil),         // 6: relayforge.v1.FetchResponse
-	(*JoinGroupRequest)(nil),      // 7: relayforge.v1.JoinGroupRequest
-	(*JoinGroupResponse)(nil),     // 8: relayforge.v1.JoinGroupResponse
-	(*PartitionAssignment)(nil),   // 9: relayforge.v1.PartitionAssignment
-	(*SyncGroupRequest)(nil),      // 10: relayforge.v1.SyncGroupRequest
-	(*SyncGroupResponse)(nil),     // 11: relayforge.v1.SyncGroupResponse
-	(*HeartbeatRequest)(nil),      // 12: relayforge.v1.HeartbeatRequest
-	(*HeartbeatResponse)(nil),     // 13: relayforge.v1.HeartbeatResponse
-	(*CommitOffsetRequest)(nil),   // 14: relayforge.v1.CommitOffsetRequest
-	(*CommitOffsetResponse)(nil),  // 15: relayforge.v1.CommitOffsetResponse
-	(*GetOffsetsRequest)(nil),     // 16: relayforge.v1.GetOffsetsRequest
-	(*OffsetInfo)(nil),            // 17: relayforge.v1.OffsetInfo
-	(*GetOffsetsResponse)(nil),    // 18: relayforge.v1.GetOffsetsResponse
-	(*DescribeGroupRequest)(nil),  // 19: relayforge.v1.DescribeGroupRequest
-	(*GroupMember)(nil),           // 20: relayforge.v1.GroupMember
-	(*DescribeGroupResponse)(nil), // 21: relayforge.v1.DescribeGroupResponse
-	(*CreateTopicRequest)(nil),    // 22: relayforge.v1.CreateTopicRequest
-	(*CreateTopicResponse)(nil),   // 23: relayforge.v1.CreateTopicResponse
-	(*TopicInfo)(nil),             // 24: relayforge.v1.TopicInfo
-	(*ListTopicsRequest)(nil),     // 25: relayforge.v1.ListTopicsRequest
-	(*ListTopicsResponse)(nil),    // 26: relayforge.v1.ListTopicsResponse
-	(*DescribeTopicRequest)(nil),  // 27: relayforge.v1.DescribeTopicRequest
-	(*DescribeTopicResponse)(nil), // 28: relayforge.v1.DescribeTopicResponse
+	(AckMode)(0),                   // 0: relayforge.v1.AckMode
+	(*Message)(nil),                // 1: relayforge.v1.Message
+	(*ProduceRequest)(nil),         // 2: relayforge.v1.ProduceRequest
+	(*ProduceResponse)(nil),        // 3: relayforge.v1.ProduceResponse
+	(*FetchRequest)(nil),           // 4: relayforge.v1.FetchRequest
+	(*FetchedRecord)(nil),          // 5: relayforge.v1.FetchedRecord
+	(*FetchResponse)(nil),          // 6: relayforge.v1.FetchResponse
+	(*JoinGroupRequest)(nil),       // 7: relayforge.v1.JoinGroupRequest
+	(*JoinGroupResponse)(nil),      // 8: relayforge.v1.JoinGroupResponse
+	(*PartitionAssignment)(nil),    // 9: relayforge.v1.PartitionAssignment
+	(*SyncGroupRequest)(nil),       // 10: relayforge.v1.SyncGroupRequest
+	(*SyncGroupResponse)(nil),      // 11: relayforge.v1.SyncGroupResponse
+	(*HeartbeatRequest)(nil),       // 12: relayforge.v1.HeartbeatRequest
+	(*HeartbeatResponse)(nil),      // 13: relayforge.v1.HeartbeatResponse
+	(*CommitOffsetRequest)(nil),    // 14: relayforge.v1.CommitOffsetRequest
+	(*CommitOffsetResponse)(nil),   // 15: relayforge.v1.CommitOffsetResponse
+	(*GetOffsetsRequest)(nil),      // 16: relayforge.v1.GetOffsetsRequest
+	(*OffsetInfo)(nil),             // 17: relayforge.v1.OffsetInfo
+	(*GetOffsetsResponse)(nil),     // 18: relayforge.v1.GetOffsetsResponse
+	(*DescribeGroupRequest)(nil),   // 19: relayforge.v1.DescribeGroupRequest
+	(*GroupMember)(nil),            // 20: relayforge.v1.GroupMember
+	(*DescribeGroupResponse)(nil),  // 21: relayforge.v1.DescribeGroupResponse
+	(*ReplicateFetchRequest)(nil),  // 22: relayforge.v1.ReplicateFetchRequest
+	(*ReplicateFetchResponse)(nil), // 23: relayforge.v1.ReplicateFetchResponse
+	(*CreateTopicRequest)(nil),     // 24: relayforge.v1.CreateTopicRequest
+	(*CreateTopicResponse)(nil),    // 25: relayforge.v1.CreateTopicResponse
+	(*TopicInfo)(nil),              // 26: relayforge.v1.TopicInfo
+	(*ListTopicsRequest)(nil),      // 27: relayforge.v1.ListTopicsRequest
+	(*ListTopicsResponse)(nil),     // 28: relayforge.v1.ListTopicsResponse
+	(*DescribeTopicRequest)(nil),   // 29: relayforge.v1.DescribeTopicRequest
+	(*DescribeTopicResponse)(nil),  // 30: relayforge.v1.DescribeTopicResponse
 }
 var file_api_proto_relayforge_v1_relayforge_proto_depIdxs = []int32{
 	0,  // 0: relayforge.v1.ProduceRequest.ack_mode:type_name -> relayforge.v1.AckMode
@@ -1746,35 +1879,38 @@ var file_api_proto_relayforge_v1_relayforge_proto_depIdxs = []int32{
 	17, // 4: relayforge.v1.GetOffsetsResponse.offsets:type_name -> relayforge.v1.OffsetInfo
 	9,  // 5: relayforge.v1.GroupMember.assignment:type_name -> relayforge.v1.PartitionAssignment
 	20, // 6: relayforge.v1.DescribeGroupResponse.members:type_name -> relayforge.v1.GroupMember
-	24, // 7: relayforge.v1.ListTopicsResponse.topics:type_name -> relayforge.v1.TopicInfo
-	24, // 8: relayforge.v1.DescribeTopicResponse.topic:type_name -> relayforge.v1.TopicInfo
-	2,  // 9: relayforge.v1.RelayForge.Produce:input_type -> relayforge.v1.ProduceRequest
-	4,  // 10: relayforge.v1.RelayForge.Fetch:input_type -> relayforge.v1.FetchRequest
-	22, // 11: relayforge.v1.RelayForge.CreateTopic:input_type -> relayforge.v1.CreateTopicRequest
-	25, // 12: relayforge.v1.RelayForge.ListTopics:input_type -> relayforge.v1.ListTopicsRequest
-	27, // 13: relayforge.v1.RelayForge.DescribeTopic:input_type -> relayforge.v1.DescribeTopicRequest
-	7,  // 14: relayforge.v1.RelayForge.JoinGroup:input_type -> relayforge.v1.JoinGroupRequest
-	10, // 15: relayforge.v1.RelayForge.SyncGroup:input_type -> relayforge.v1.SyncGroupRequest
-	12, // 16: relayforge.v1.RelayForge.Heartbeat:input_type -> relayforge.v1.HeartbeatRequest
-	14, // 17: relayforge.v1.RelayForge.CommitOffset:input_type -> relayforge.v1.CommitOffsetRequest
-	16, // 18: relayforge.v1.RelayForge.GetOffsets:input_type -> relayforge.v1.GetOffsetsRequest
-	19, // 19: relayforge.v1.RelayForge.DescribeGroup:input_type -> relayforge.v1.DescribeGroupRequest
-	3,  // 20: relayforge.v1.RelayForge.Produce:output_type -> relayforge.v1.ProduceResponse
-	6,  // 21: relayforge.v1.RelayForge.Fetch:output_type -> relayforge.v1.FetchResponse
-	23, // 22: relayforge.v1.RelayForge.CreateTopic:output_type -> relayforge.v1.CreateTopicResponse
-	26, // 23: relayforge.v1.RelayForge.ListTopics:output_type -> relayforge.v1.ListTopicsResponse
-	28, // 24: relayforge.v1.RelayForge.DescribeTopic:output_type -> relayforge.v1.DescribeTopicResponse
-	8,  // 25: relayforge.v1.RelayForge.JoinGroup:output_type -> relayforge.v1.JoinGroupResponse
-	11, // 26: relayforge.v1.RelayForge.SyncGroup:output_type -> relayforge.v1.SyncGroupResponse
-	13, // 27: relayforge.v1.RelayForge.Heartbeat:output_type -> relayforge.v1.HeartbeatResponse
-	15, // 28: relayforge.v1.RelayForge.CommitOffset:output_type -> relayforge.v1.CommitOffsetResponse
-	18, // 29: relayforge.v1.RelayForge.GetOffsets:output_type -> relayforge.v1.GetOffsetsResponse
-	21, // 30: relayforge.v1.RelayForge.DescribeGroup:output_type -> relayforge.v1.DescribeGroupResponse
-	20, // [20:31] is the sub-list for method output_type
-	9,  // [9:20] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	5,  // 7: relayforge.v1.ReplicateFetchResponse.records:type_name -> relayforge.v1.FetchedRecord
+	26, // 8: relayforge.v1.ListTopicsResponse.topics:type_name -> relayforge.v1.TopicInfo
+	26, // 9: relayforge.v1.DescribeTopicResponse.topic:type_name -> relayforge.v1.TopicInfo
+	2,  // 10: relayforge.v1.RelayForge.Produce:input_type -> relayforge.v1.ProduceRequest
+	4,  // 11: relayforge.v1.RelayForge.Fetch:input_type -> relayforge.v1.FetchRequest
+	24, // 12: relayforge.v1.RelayForge.CreateTopic:input_type -> relayforge.v1.CreateTopicRequest
+	27, // 13: relayforge.v1.RelayForge.ListTopics:input_type -> relayforge.v1.ListTopicsRequest
+	29, // 14: relayforge.v1.RelayForge.DescribeTopic:input_type -> relayforge.v1.DescribeTopicRequest
+	7,  // 15: relayforge.v1.RelayForge.JoinGroup:input_type -> relayforge.v1.JoinGroupRequest
+	10, // 16: relayforge.v1.RelayForge.SyncGroup:input_type -> relayforge.v1.SyncGroupRequest
+	12, // 17: relayforge.v1.RelayForge.Heartbeat:input_type -> relayforge.v1.HeartbeatRequest
+	14, // 18: relayforge.v1.RelayForge.CommitOffset:input_type -> relayforge.v1.CommitOffsetRequest
+	16, // 19: relayforge.v1.RelayForge.GetOffsets:input_type -> relayforge.v1.GetOffsetsRequest
+	19, // 20: relayforge.v1.RelayForge.DescribeGroup:input_type -> relayforge.v1.DescribeGroupRequest
+	22, // 21: relayforge.v1.RelayForge.ReplicateFetch:input_type -> relayforge.v1.ReplicateFetchRequest
+	3,  // 22: relayforge.v1.RelayForge.Produce:output_type -> relayforge.v1.ProduceResponse
+	6,  // 23: relayforge.v1.RelayForge.Fetch:output_type -> relayforge.v1.FetchResponse
+	25, // 24: relayforge.v1.RelayForge.CreateTopic:output_type -> relayforge.v1.CreateTopicResponse
+	28, // 25: relayforge.v1.RelayForge.ListTopics:output_type -> relayforge.v1.ListTopicsResponse
+	30, // 26: relayforge.v1.RelayForge.DescribeTopic:output_type -> relayforge.v1.DescribeTopicResponse
+	8,  // 27: relayforge.v1.RelayForge.JoinGroup:output_type -> relayforge.v1.JoinGroupResponse
+	11, // 28: relayforge.v1.RelayForge.SyncGroup:output_type -> relayforge.v1.SyncGroupResponse
+	13, // 29: relayforge.v1.RelayForge.Heartbeat:output_type -> relayforge.v1.HeartbeatResponse
+	15, // 30: relayforge.v1.RelayForge.CommitOffset:output_type -> relayforge.v1.CommitOffsetResponse
+	18, // 31: relayforge.v1.RelayForge.GetOffsets:output_type -> relayforge.v1.GetOffsetsResponse
+	21, // 32: relayforge.v1.RelayForge.DescribeGroup:output_type -> relayforge.v1.DescribeGroupResponse
+	23, // 33: relayforge.v1.RelayForge.ReplicateFetch:output_type -> relayforge.v1.ReplicateFetchResponse
+	22, // [22:34] is the sub-list for method output_type
+	10, // [10:22] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_relayforge_v1_relayforge_proto_init() }
@@ -1788,7 +1924,7 @@ func file_api_proto_relayforge_v1_relayforge_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_relayforge_v1_relayforge_proto_rawDesc), len(file_api_proto_relayforge_v1_relayforge_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   28,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

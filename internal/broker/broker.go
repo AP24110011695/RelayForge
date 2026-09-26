@@ -106,6 +106,9 @@ type Options struct {
 	FetchPollInterval time.Duration // long-poll cadence; 0 selects the default
 	ProduceQueueDepth int           // bounded per-partition queue; 0 selects the default
 	Metrics           *observability.Metrics
+	// Replication, when set, runs this broker in the FOLLOWER role
+	// (async pull from the leader). nil = standalone/leader.
+	Replication *Replication
 }
 
 type partition struct {
@@ -138,6 +141,8 @@ type Broker struct {
 	store         *metadata.Store
 	parts         map[string][]*partition // topic -> partitions
 	groups        *group.Coordinator
+	repl          *replicationState
+	isFollower    bool
 	metrics       *observability.Metrics
 	queueDepth    int
 	maxRecordSize int
@@ -203,7 +208,25 @@ func Open(opts Options) (*Broker, error) {
 		}
 	}
 	b.metrics.RecoveryObs(recovered)
+	if opts.Replication != nil {
+		b.isFollower = true
+		if err := b.startReplication(*opts.Replication); err != nil {
+			b.closeAllParts()
+			return nil, err
+		}
+	} else if err := b.bumpEpochs(); err != nil {
+		b.closeAllParts()
+		return nil, err
+	}
 	return b, nil
+}
+
+func (b *Broker) closeAllParts() {
+	b.mu.Lock()
+	parts := b.parts
+	b.parts = map[string][]*partition{}
+	b.mu.Unlock()
+	b.closePartsAndWait(parts)
 }
 
 func (b *Broker) openPartition(topic string, id int32) (*partition, error) {
@@ -325,6 +348,10 @@ func (b *Broker) Produce(ctx context.Context, topic string, partitionID int32, a
 	if b.closed {
 		b.mu.RUnlock()
 		return nil, ErrClosed
+	}
+	if b.isFollower {
+		b.mu.RUnlock()
+		return nil, ErrNotLeader
 	}
 	// Registered under the lock so Close (which takes the write lock,
 	// then waits for in-flight produces) can never close a queue while a
@@ -514,6 +541,7 @@ func (b *Broker) Close() error {
 	// mid-submit once this wait returns.
 	b.inflight.Wait()
 	b.closePartsAndWait(parts)
+	b.stopReplication()
 	b.groups.Close()
 	return nil
 }
