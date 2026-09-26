@@ -12,15 +12,17 @@ semantics, group fencing) plus reproducible benchmarks.
 
 ## Status
 
-**Phase 2 of 10 complete — Networking Fundamentals + Binary Protocol Concepts.**
+**Phase 3 of 10 complete — Binary Record Format + Append-Only Storage.**
 
 - Verified WSL2 (Ubuntu 26.04 LTS) toolchain; see
   [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
+- `internal/record` + `internal/logengine`: record format v1 and the
+  single-file append-only log — golden/property/fuzz tested, with torn-tail
+  recovery to the longest valid prefix
+  ([docs/RECORD_FORMAT.md](docs/RECORD_FORMAT.md)).
 - `internal/framing`: tested and fuzzed length-prefix wire framing
   ([docs/FRAMING.md](docs/FRAMING.md)); TCP/framing labs live in `~/rf-labs`.
-- `internal/version`: build information (first library package, Phase 1).
-- No broker behavior yet, by design. The record format and log engine start
-  in Phase 3; the gRPC API in Phase 5.
+- No broker behavior yet, by design. The gRPC API arrives in Phase 5.
 
 Authoritative documents:
 
@@ -69,9 +71,11 @@ Current layout:
 
 ```text
 PLAN.md, IMPLEMENTATION_PLAN.md   # roadmap + agent operating manual
-docs/                             # environment, framing, design decisions
+docs/                             # environment, framing, record format, decisions
 internal/framing/                 # length-prefix wire framing (tested + fuzzed)
-internal/version/                 # build information (first library package)
+internal/logengine/               # single-file append-only log
+internal/record/                  # record format v1 (golden + fuzz tested)
+internal/version/                 # build information
 ```
 
 The tree grows only when its functionality exists.
