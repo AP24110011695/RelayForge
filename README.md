@@ -12,16 +12,17 @@ semantics, group fencing) plus reproducible benchmarks.
 
 ## Status
 
-**Phase 3 of 10 complete — Binary Record Format + Append-Only Storage.**
+**Phase 4 of 10 complete — Durability + Crash Recovery + Segments + Indexes + Retention.**
 
 - Verified WSL2 (Ubuntu 26.04 LTS) toolchain; see
   [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
-- `internal/record` + `internal/logengine`: record format v1 and the
-  single-file append-only log — golden/property/fuzz tested, with torn-tail
-  recovery to the longest valid prefix
-  ([docs/RECORD_FORMAT.md](docs/RECORD_FORMAT.md)).
-- `internal/framing`: tested and fuzzed length-prefix wire framing
-  ([docs/FRAMING.md](docs/FRAMING.md)); TCP/framing labs live in `~/rf-labs`.
+- `internal/logengine`: segment-set log engine — rolling segments with
+  sparse indexes, the durability ladder (`None`/`Written`/`Flushed`), crash
+  recovery to the longest valid prefix, retention, and a SIGKILL crash
+  harness ([docs/STORAGE.md](docs/STORAGE.md),
+  [docs/GUARANTEES.md](docs/GUARANTEES.md)).
+- `internal/record`: record format v1 (golden + fuzz tested,
+  [docs/RECORD_FORMAT.md](docs/RECORD_FORMAT.md)).
 - No broker behavior yet, by design. The gRPC API arrives in Phase 5.
 
 Authoritative documents:
@@ -71,9 +72,9 @@ Current layout:
 
 ```text
 PLAN.md, IMPLEMENTATION_PLAN.md   # roadmap + agent operating manual
-docs/                             # environment, framing, record format, decisions
+docs/                             # environment, storage, guarantees, formats, decisions
 internal/framing/                 # length-prefix wire framing (tested + fuzzed)
-internal/logengine/               # single-file append-only log
+internal/logengine/               # segment-set log engine (durability, recovery, retention)
 internal/record/                  # record format v1 (golden + fuzz tested)
 internal/version/                 # build information
 ```
