@@ -14,6 +14,7 @@ import (
 	relayforgev1 "relayforge/api/proto/relayforge/v1"
 
 	"relayforge/internal/logengine"
+	"relayforge/internal/metadata"
 	"relayforge/internal/record"
 )
 
@@ -90,27 +91,55 @@ func mapAck(m relayforgev1.AckMode) Ack {
 	}
 }
 
-// toStatus maps broker/engine errors to gRPC status codes per the table in
-// docs/PROTOCOL.md. Unknown errors map to Internal.
+// toStatus maps broker/engine/metadata errors to gRPC status codes per the
+// table in docs/PROTOCOL.md. Unknown errors map to Internal.
 func toStatus(err error) error {
 	switch {
 	case err == nil:
 		return nil
 	case errors.Is(err, ErrUnknownTopicOrPartition):
 		return status.Error(codes.NotFound, err.Error())
+	case errors.Is(err, metadata.ErrTopicNotFound):
+		return status.Error(codes.NotFound, err.Error())
 	case errors.Is(err, logengine.ErrOffsetOutOfRange):
 		return status.Error(codes.OutOfRange, err.Error())
-	case errors.Is(err, ErrBatchTooLarge), errors.Is(err, record.ErrRecordTooLarge):
+	case errors.Is(err, ErrBatchTooLarge), errors.Is(err, record.ErrRecordTooLarge), errors.Is(err, ErrOverloaded):
 		return status.Error(codes.ResourceExhausted, err.Error())
-	case errors.Is(err, ErrEmptyBatch):
+	case errors.Is(err, ErrEmptyBatch), errors.Is(err, metadata.ErrInvalidTopic):
 		return status.Error(codes.InvalidArgument, err.Error())
-	case errors.Is(err, logengine.ErrClosed):
+	case errors.Is(err, metadata.ErrTopicExists):
+		return status.Error(codes.AlreadyExists, err.Error())
+	case errors.Is(err, ErrPartitionFailed), errors.Is(err, ErrClosed), errors.Is(err, logengine.ErrClosed):
 		return status.Error(codes.Unavailable, err.Error())
 	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, context.Canceled):
 		return status.FromContextError(err).Err()
 	default:
 		return status.Error(codes.Internal, err.Error())
 	}
+}
+
+func (s *server) CreateTopic(ctx context.Context, req *relayforgev1.CreateTopicRequest) (*relayforgev1.CreateTopicResponse, error) {
+	if err := s.b.CreateTopic(req.GetName(), req.GetPartitionCount()); err != nil {
+		return nil, toStatus(err)
+	}
+	return &relayforgev1.CreateTopicResponse{}, nil
+}
+
+func (s *server) ListTopics(ctx context.Context, req *relayforgev1.ListTopicsRequest) (*relayforgev1.ListTopicsResponse, error) {
+	topics := s.b.ListTopics()
+	out := make([]*relayforgev1.TopicInfo, len(topics))
+	for i, t := range topics {
+		out[i] = &relayforgev1.TopicInfo{Name: t.Name, PartitionCount: t.PartitionCount}
+	}
+	return &relayforgev1.ListTopicsResponse{Topics: out}, nil
+}
+
+func (s *server) DescribeTopic(ctx context.Context, req *relayforgev1.DescribeTopicRequest) (*relayforgev1.DescribeTopicResponse, error) {
+	t, err := s.b.DescribeTopic(req.GetName())
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	return &relayforgev1.DescribeTopicResponse{Topic: &relayforgev1.TopicInfo{Name: t.Name, PartitionCount: t.PartitionCount}}, nil
 }
 
 func recoveryInterceptor(log *slog.Logger) grpc.UnaryServerInterceptor {

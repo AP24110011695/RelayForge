@@ -22,8 +22,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RelayForge_Produce_FullMethodName = "/relayforge.v1.RelayForge/Produce"
-	RelayForge_Fetch_FullMethodName   = "/relayforge.v1.RelayForge/Fetch"
+	RelayForge_Produce_FullMethodName       = "/relayforge.v1.RelayForge/Produce"
+	RelayForge_Fetch_FullMethodName         = "/relayforge.v1.RelayForge/Fetch"
+	RelayForge_CreateTopic_FullMethodName   = "/relayforge.v1.RelayForge/CreateTopic"
+	RelayForge_ListTopics_FullMethodName    = "/relayforge.v1.RelayForge/ListTopics"
+	RelayForge_DescribeTopic_FullMethodName = "/relayforge.v1.RelayForge/DescribeTopic"
 )
 
 // RelayForgeClient is the client API for RelayForge service.
@@ -32,6 +35,9 @@ const (
 type RelayForgeClient interface {
 	Produce(ctx context.Context, in *ProduceRequest, opts ...grpc.CallOption) (*ProduceResponse, error)
 	Fetch(ctx context.Context, in *FetchRequest, opts ...grpc.CallOption) (*FetchResponse, error)
+	CreateTopic(ctx context.Context, in *CreateTopicRequest, opts ...grpc.CallOption) (*CreateTopicResponse, error)
+	ListTopics(ctx context.Context, in *ListTopicsRequest, opts ...grpc.CallOption) (*ListTopicsResponse, error)
+	DescribeTopic(ctx context.Context, in *DescribeTopicRequest, opts ...grpc.CallOption) (*DescribeTopicResponse, error)
 }
 
 type relayForgeClient struct {
@@ -62,12 +68,45 @@ func (c *relayForgeClient) Fetch(ctx context.Context, in *FetchRequest, opts ...
 	return out, nil
 }
 
+func (c *relayForgeClient) CreateTopic(ctx context.Context, in *CreateTopicRequest, opts ...grpc.CallOption) (*CreateTopicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateTopicResponse)
+	err := c.cc.Invoke(ctx, RelayForge_CreateTopic_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *relayForgeClient) ListTopics(ctx context.Context, in *ListTopicsRequest, opts ...grpc.CallOption) (*ListTopicsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTopicsResponse)
+	err := c.cc.Invoke(ctx, RelayForge_ListTopics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *relayForgeClient) DescribeTopic(ctx context.Context, in *DescribeTopicRequest, opts ...grpc.CallOption) (*DescribeTopicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DescribeTopicResponse)
+	err := c.cc.Invoke(ctx, RelayForge_DescribeTopic_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RelayForgeServer is the server API for RelayForge service.
 // All implementations must embed UnimplementedRelayForgeServer
 // for forward compatibility.
 type RelayForgeServer interface {
 	Produce(context.Context, *ProduceRequest) (*ProduceResponse, error)
 	Fetch(context.Context, *FetchRequest) (*FetchResponse, error)
+	CreateTopic(context.Context, *CreateTopicRequest) (*CreateTopicResponse, error)
+	ListTopics(context.Context, *ListTopicsRequest) (*ListTopicsResponse, error)
+	DescribeTopic(context.Context, *DescribeTopicRequest) (*DescribeTopicResponse, error)
 	mustEmbedUnimplementedRelayForgeServer()
 }
 
@@ -83,6 +122,15 @@ func (UnimplementedRelayForgeServer) Produce(context.Context, *ProduceRequest) (
 }
 func (UnimplementedRelayForgeServer) Fetch(context.Context, *FetchRequest) (*FetchResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Fetch not implemented")
+}
+func (UnimplementedRelayForgeServer) CreateTopic(context.Context, *CreateTopicRequest) (*CreateTopicResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateTopic not implemented")
+}
+func (UnimplementedRelayForgeServer) ListTopics(context.Context, *ListTopicsRequest) (*ListTopicsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTopics not implemented")
+}
+func (UnimplementedRelayForgeServer) DescribeTopic(context.Context, *DescribeTopicRequest) (*DescribeTopicResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DescribeTopic not implemented")
 }
 func (UnimplementedRelayForgeServer) mustEmbedUnimplementedRelayForgeServer() {}
 func (UnimplementedRelayForgeServer) testEmbeddedByValue()                    {}
@@ -141,6 +189,60 @@ func _RelayForge_Fetch_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RelayForge_CreateTopic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).CreateTopic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_CreateTopic_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).CreateTopic(ctx, req.(*CreateTopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RelayForge_ListTopics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTopicsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).ListTopics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_ListTopics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).ListTopics(ctx, req.(*ListTopicsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RelayForge_DescribeTopic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DescribeTopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).DescribeTopic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_DescribeTopic_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).DescribeTopic(ctx, req.(*DescribeTopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RelayForge_ServiceDesc is the grpc.ServiceDesc for RelayForge service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -155,6 +257,18 @@ var RelayForge_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Fetch",
 			Handler:    _RelayForge_Fetch_Handler,
+		},
+		{
+			MethodName: "CreateTopic",
+			Handler:    _RelayForge_CreateTopic_Handler,
+		},
+		{
+			MethodName: "ListTopics",
+			Handler:    _RelayForge_ListTopics_Handler,
+		},
+		{
+			MethodName: "DescribeTopic",
+			Handler:    _RelayForge_DescribeTopic_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

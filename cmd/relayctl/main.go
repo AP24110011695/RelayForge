@@ -4,6 +4,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -32,6 +33,8 @@ func main() {
 		err = cmdProduce(os.Args[2:])
 	case "fetch":
 		err = cmdFetch(os.Args[2:])
+	case "topic":
+		err = cmdTopic(os.Args[2:])
 	case "health":
 		err = cmdHealth(os.Args[2:])
 	case "version":
@@ -56,8 +59,85 @@ func usage() {
 commands:
   produce  append messages (flags or stdin, one message per line)
   fetch    read records from a topic partition
+  topic    create/list/describe topics
   health   check broker serving status
   version  print build information`)
+}
+
+func cmdTopic(args []string) error {
+	if len(args) == 0 {
+		return errors.New("topic requires a subcommand: create, list, describe")
+	}
+	switch args[0] {
+	case "create":
+		fs := flag.NewFlagSet("topic create", flag.ExitOnError)
+		addr := fs.String("addr", "127.0.0.1:7000", "broker address")
+		name := fs.String("name", "", "topic name")
+		partitions := fs.Int("partitions", 1, "partition count (fixed at creation)")
+		timeout := fs.Duration("timeout", 10*time.Second, "rpc timeout")
+		fs.Parse(args[1:])
+		if *name == "" {
+			return errors.New("topic create: -name is required")
+		}
+		conn, err := dial(*addr, *timeout)
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+		ctx, cancel := context.WithTimeout(context.Background(), *timeout)
+		defer cancel()
+		_, err = relayforgev1.NewRelayForgeClient(conn).CreateTopic(ctx,
+			&relayforgev1.CreateTopicRequest{Name: *name, PartitionCount: int32(*partitions)})
+		if err != nil {
+			return err
+		}
+		fmt.Printf("created %s with %d partitions\n", *name, *partitions)
+		return nil
+	case "list":
+		fs := flag.NewFlagSet("topic list", flag.ExitOnError)
+		addr := fs.String("addr", "127.0.0.1:7000", "broker address")
+		timeout := fs.Duration("timeout", 10*time.Second, "rpc timeout")
+		fs.Parse(args[1:])
+		conn, err := dial(*addr, *timeout)
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+		ctx, cancel := context.WithTimeout(context.Background(), *timeout)
+		defer cancel()
+		resp, err := relayforgev1.NewRelayForgeClient(conn).ListTopics(ctx, &relayforgev1.ListTopicsRequest{})
+		if err != nil {
+			return err
+		}
+		for _, t := range resp.GetTopics() {
+			fmt.Printf("%s\tpartitions=%d\n", t.GetName(), t.GetPartitionCount())
+		}
+		return nil
+	case "describe":
+		fs := flag.NewFlagSet("topic describe", flag.ExitOnError)
+		addr := fs.String("addr", "127.0.0.1:7000", "broker address")
+		name := fs.String("name", "", "topic name")
+		timeout := fs.Duration("timeout", 10*time.Second, "rpc timeout")
+		fs.Parse(args[1:])
+		if *name == "" {
+			return errors.New("topic describe: -name is required")
+		}
+		conn, err := dial(*addr, *timeout)
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+		ctx, cancel := context.WithTimeout(context.Background(), *timeout)
+		defer cancel()
+		resp, err := relayforgev1.NewRelayForgeClient(conn).DescribeTopic(ctx, &relayforgev1.DescribeTopicRequest{Name: *name})
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\tpartitions=%d\n", resp.GetTopic().GetName(), resp.GetTopic().GetPartitionCount())
+		return nil
+	default:
+		return fmt.Errorf("unknown topic subcommand %q", args[0])
+	}
 }
 
 func dial(addr string, timeout time.Duration) (*grpc.ClientConn, error) {
@@ -75,7 +155,7 @@ func cmdProduce(args []string) error {
 	fs := flag.NewFlagSet("produce", flag.ExitOnError)
 	addr := fs.String("addr", "127.0.0.1:7000", "broker address")
 	topic := fs.String("topic", "default", "topic")
-	partition := fs.Int("partition", 0, "partition")
+	partition := fs.Int("partition", -1, "pin all messages to this partition (-1 = route by key, keyless round-robin)")
 	key := fs.String("key", "", "key for all messages")
 	ack := fs.String("ack", "written", "acknowledgement mode: none, written, flushed")
 	msg := fs.String("m", "", "single message value (stdin is read when omitted)")

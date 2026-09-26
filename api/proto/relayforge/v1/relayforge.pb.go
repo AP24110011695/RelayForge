@@ -456,6 +456,315 @@ func (x *FetchResponse) GetHighWatermark() uint64 {
 	return 0
 }
 
+type CreateTopicRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Partition count is fixed at creation; resizing is not supported.
+	PartitionCount int32 `protobuf:"varint,2,opt,name=partition_count,json=partitionCount,proto3" json:"partition_count,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *CreateTopicRequest) Reset() {
+	*x = CreateTopicRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateTopicRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateTopicRequest) ProtoMessage() {}
+
+func (x *CreateTopicRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateTopicRequest.ProtoReflect.Descriptor instead.
+func (*CreateTopicRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CreateTopicRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateTopicRequest) GetPartitionCount() int32 {
+	if x != nil {
+		return x.PartitionCount
+	}
+	return 0
+}
+
+type CreateTopicResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateTopicResponse) Reset() {
+	*x = CreateTopicResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateTopicResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateTopicResponse) ProtoMessage() {}
+
+func (x *CreateTopicResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateTopicResponse.ProtoReflect.Descriptor instead.
+func (*CreateTopicResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{7}
+}
+
+type TopicInfo struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Name           string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	PartitionCount int32                  `protobuf:"varint,2,opt,name=partition_count,json=partitionCount,proto3" json:"partition_count,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *TopicInfo) Reset() {
+	*x = TopicInfo{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TopicInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TopicInfo) ProtoMessage() {}
+
+func (x *TopicInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TopicInfo.ProtoReflect.Descriptor instead.
+func (*TopicInfo) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *TopicInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *TopicInfo) GetPartitionCount() int32 {
+	if x != nil {
+		return x.PartitionCount
+	}
+	return 0
+}
+
+type ListTopicsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTopicsRequest) Reset() {
+	*x = ListTopicsRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTopicsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTopicsRequest) ProtoMessage() {}
+
+func (x *ListTopicsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTopicsRequest.ProtoReflect.Descriptor instead.
+func (*ListTopicsRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{9}
+}
+
+type ListTopicsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Topics        []*TopicInfo           `protobuf:"bytes,1,rep,name=topics,proto3" json:"topics,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTopicsResponse) Reset() {
+	*x = ListTopicsResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTopicsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTopicsResponse) ProtoMessage() {}
+
+func (x *ListTopicsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTopicsResponse.ProtoReflect.Descriptor instead.
+func (*ListTopicsResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ListTopicsResponse) GetTopics() []*TopicInfo {
+	if x != nil {
+		return x.Topics
+	}
+	return nil
+}
+
+type DescribeTopicRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DescribeTopicRequest) Reset() {
+	*x = DescribeTopicRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DescribeTopicRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DescribeTopicRequest) ProtoMessage() {}
+
+func (x *DescribeTopicRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DescribeTopicRequest.ProtoReflect.Descriptor instead.
+func (*DescribeTopicRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *DescribeTopicRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type DescribeTopicResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Topic         *TopicInfo             `protobuf:"bytes,1,opt,name=topic,proto3" json:"topic,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DescribeTopicResponse) Reset() {
+	*x = DescribeTopicResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DescribeTopicResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DescribeTopicResponse) ProtoMessage() {}
+
+func (x *DescribeTopicResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DescribeTopicResponse.ProtoReflect.Descriptor instead.
+func (*DescribeTopicResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *DescribeTopicResponse) GetTopic() *TopicInfo {
+	if x != nil {
+		return x.Topic
+	}
+	return nil
+}
+
 var File_api_proto_relayforge_v1_relayforge_proto protoreflect.FileDescriptor
 
 const file_api_proto_relayforge_v1_relayforge_proto_rawDesc = "" +
@@ -486,16 +795,34 @@ const file_api_proto_relayforge_v1_relayforge_proto_rawDesc = "" +
 	"\arecords\x18\x01 \x03(\v2\x1c.relayforge.v1.FetchedRecordR\arecords\x12\x1f\n" +
 	"\vnext_offset\x18\x02 \x01(\x04R\n" +
 	"nextOffset\x12%\n" +
-	"\x0ehigh_watermark\x18\x03 \x01(\x04R\rhighWatermark*b\n" +
+	"\x0ehigh_watermark\x18\x03 \x01(\x04R\rhighWatermark\"Q\n" +
+	"\x12CreateTopicRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12'\n" +
+	"\x0fpartition_count\x18\x02 \x01(\x05R\x0epartitionCount\"\x15\n" +
+	"\x13CreateTopicResponse\"H\n" +
+	"\tTopicInfo\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12'\n" +
+	"\x0fpartition_count\x18\x02 \x01(\x05R\x0epartitionCount\"\x13\n" +
+	"\x11ListTopicsRequest\"F\n" +
+	"\x12ListTopicsResponse\x120\n" +
+	"\x06topics\x18\x01 \x03(\v2\x18.relayforge.v1.TopicInfoR\x06topics\"*\n" +
+	"\x14DescribeTopicRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"G\n" +
+	"\x15DescribeTopicResponse\x12.\n" +
+	"\x05topic\x18\x01 \x01(\v2\x18.relayforge.v1.TopicInfoR\x05topic*b\n" +
 	"\aAckMode\x12\x18\n" +
 	"\x14ACK_MODE_UNSPECIFIED\x10\x00\x12\x11\n" +
 	"\rACK_MODE_NONE\x10\x01\x12\x14\n" +
 	"\x10ACK_MODE_WRITTEN\x10\x02\x12\x14\n" +
-	"\x10ACK_MODE_FLUSHED\x10\x032\x9a\x01\n" +
+	"\x10ACK_MODE_FLUSHED\x10\x032\x9f\x03\n" +
 	"\n" +
 	"RelayForge\x12H\n" +
 	"\aProduce\x12\x1d.relayforge.v1.ProduceRequest\x1a\x1e.relayforge.v1.ProduceResponse\x12B\n" +
-	"\x05Fetch\x12\x1b.relayforge.v1.FetchRequest\x1a\x1c.relayforge.v1.FetchResponseB1Z/relayforge/api/proto/relayforge/v1;relayforgev1b\x06proto3"
+	"\x05Fetch\x12\x1b.relayforge.v1.FetchRequest\x1a\x1c.relayforge.v1.FetchResponse\x12T\n" +
+	"\vCreateTopic\x12!.relayforge.v1.CreateTopicRequest\x1a\".relayforge.v1.CreateTopicResponse\x12Q\n" +
+	"\n" +
+	"ListTopics\x12 .relayforge.v1.ListTopicsRequest\x1a!.relayforge.v1.ListTopicsResponse\x12Z\n" +
+	"\rDescribeTopic\x12#.relayforge.v1.DescribeTopicRequest\x1a$.relayforge.v1.DescribeTopicResponseB1Z/relayforge/api/proto/relayforge/v1;relayforgev1b\x06proto3"
 
 var (
 	file_api_proto_relayforge_v1_relayforge_proto_rawDescOnce sync.Once
@@ -510,29 +837,44 @@ func file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP() []byte {
 }
 
 var file_api_proto_relayforge_v1_relayforge_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_proto_relayforge_v1_relayforge_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_api_proto_relayforge_v1_relayforge_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_api_proto_relayforge_v1_relayforge_proto_goTypes = []any{
-	(AckMode)(0),            // 0: relayforge.v1.AckMode
-	(*Message)(nil),         // 1: relayforge.v1.Message
-	(*ProduceRequest)(nil),  // 2: relayforge.v1.ProduceRequest
-	(*ProduceResponse)(nil), // 3: relayforge.v1.ProduceResponse
-	(*FetchRequest)(nil),    // 4: relayforge.v1.FetchRequest
-	(*FetchedRecord)(nil),   // 5: relayforge.v1.FetchedRecord
-	(*FetchResponse)(nil),   // 6: relayforge.v1.FetchResponse
+	(AckMode)(0),                  // 0: relayforge.v1.AckMode
+	(*Message)(nil),               // 1: relayforge.v1.Message
+	(*ProduceRequest)(nil),        // 2: relayforge.v1.ProduceRequest
+	(*ProduceResponse)(nil),       // 3: relayforge.v1.ProduceResponse
+	(*FetchRequest)(nil),          // 4: relayforge.v1.FetchRequest
+	(*FetchedRecord)(nil),         // 5: relayforge.v1.FetchedRecord
+	(*FetchResponse)(nil),         // 6: relayforge.v1.FetchResponse
+	(*CreateTopicRequest)(nil),    // 7: relayforge.v1.CreateTopicRequest
+	(*CreateTopicResponse)(nil),   // 8: relayforge.v1.CreateTopicResponse
+	(*TopicInfo)(nil),             // 9: relayforge.v1.TopicInfo
+	(*ListTopicsRequest)(nil),     // 10: relayforge.v1.ListTopicsRequest
+	(*ListTopicsResponse)(nil),    // 11: relayforge.v1.ListTopicsResponse
+	(*DescribeTopicRequest)(nil),  // 12: relayforge.v1.DescribeTopicRequest
+	(*DescribeTopicResponse)(nil), // 13: relayforge.v1.DescribeTopicResponse
 }
 var file_api_proto_relayforge_v1_relayforge_proto_depIdxs = []int32{
-	0, // 0: relayforge.v1.ProduceRequest.ack_mode:type_name -> relayforge.v1.AckMode
-	1, // 1: relayforge.v1.ProduceRequest.messages:type_name -> relayforge.v1.Message
-	5, // 2: relayforge.v1.FetchResponse.records:type_name -> relayforge.v1.FetchedRecord
-	2, // 3: relayforge.v1.RelayForge.Produce:input_type -> relayforge.v1.ProduceRequest
-	4, // 4: relayforge.v1.RelayForge.Fetch:input_type -> relayforge.v1.FetchRequest
-	3, // 5: relayforge.v1.RelayForge.Produce:output_type -> relayforge.v1.ProduceResponse
-	6, // 6: relayforge.v1.RelayForge.Fetch:output_type -> relayforge.v1.FetchResponse
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0,  // 0: relayforge.v1.ProduceRequest.ack_mode:type_name -> relayforge.v1.AckMode
+	1,  // 1: relayforge.v1.ProduceRequest.messages:type_name -> relayforge.v1.Message
+	5,  // 2: relayforge.v1.FetchResponse.records:type_name -> relayforge.v1.FetchedRecord
+	9,  // 3: relayforge.v1.ListTopicsResponse.topics:type_name -> relayforge.v1.TopicInfo
+	9,  // 4: relayforge.v1.DescribeTopicResponse.topic:type_name -> relayforge.v1.TopicInfo
+	2,  // 5: relayforge.v1.RelayForge.Produce:input_type -> relayforge.v1.ProduceRequest
+	4,  // 6: relayforge.v1.RelayForge.Fetch:input_type -> relayforge.v1.FetchRequest
+	7,  // 7: relayforge.v1.RelayForge.CreateTopic:input_type -> relayforge.v1.CreateTopicRequest
+	10, // 8: relayforge.v1.RelayForge.ListTopics:input_type -> relayforge.v1.ListTopicsRequest
+	12, // 9: relayforge.v1.RelayForge.DescribeTopic:input_type -> relayforge.v1.DescribeTopicRequest
+	3,  // 10: relayforge.v1.RelayForge.Produce:output_type -> relayforge.v1.ProduceResponse
+	6,  // 11: relayforge.v1.RelayForge.Fetch:output_type -> relayforge.v1.FetchResponse
+	8,  // 12: relayforge.v1.RelayForge.CreateTopic:output_type -> relayforge.v1.CreateTopicResponse
+	11, // 13: relayforge.v1.RelayForge.ListTopics:output_type -> relayforge.v1.ListTopicsResponse
+	13, // 14: relayforge.v1.RelayForge.DescribeTopic:output_type -> relayforge.v1.DescribeTopicResponse
+	10, // [10:15] is the sub-list for method output_type
+	5,  // [5:10] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_relayforge_v1_relayforge_proto_init() }
@@ -546,7 +888,7 @@ func file_api_proto_relayforge_v1_relayforge_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_relayforge_v1_relayforge_proto_rawDesc), len(file_api_proto_relayforge_v1_relayforge_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   6,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -65,4 +65,34 @@ message FetchResponse {
 service RelayForge {
   rpc Produce(ProduceRequest) returns (ProduceResponse);
   rpc Fetch(FetchRequest) returns (FetchResponse);
+  rpc CreateTopic(CreateTopicRequest) returns (CreateTopicResponse);
+  rpc ListTopics(ListTopicsRequest) returns (ListTopicsResponse);
+  rpc DescribeTopic(DescribeTopicRequest) returns (DescribeTopicResponse);
+}
+
+message CreateTopicRequest {
+  string name = 1;
+  // Partition count is fixed at creation; resizing is not supported.
+  int32 partition_count = 2;
+}
+
+message CreateTopicResponse {}
+
+message TopicInfo {
+  string name = 1;
+  int32 partition_count = 2;
+}
+
+message ListTopicsRequest {}
+
+message ListTopicsResponse {
+  repeated TopicInfo topics = 1;
+}
+
+message DescribeTopicRequest {
+  string name = 1;
+}
+
+message DescribeTopicResponse {
+  TopicInfo topic = 1;
 }
