@@ -110,11 +110,31 @@ func TestAdminServerEndpoints(t *testing.T) {
 	reg := prometheus.NewRegistry()
 	metrics := observability.New(reg)
 	metrics.OverloadInc() // label-less counter: present even with no broker activity
-	mux := observability.NewAdminServer(reg, func() bool { return true })
+	overview := func() observability.OverviewData {
+		return observability.OverviewData{
+			Healthy: true,
+			Streams: []observability.StreamRow{{Topic: "default", Partitions: 1, Events: 10}},
+			Groups:  []observability.GroupRow{{Group: "workers", Members: 2, Started: true, Lag: 6, Behind: true}},
+		}
+	}
+	mux := observability.NewAdminServer(reg, func() bool { return true }, overview)
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/healthz", nil))
 	if rec.Code != 200 {
 		t.Errorf("healthz = %d", rec.Code)
+	}
+	// The Overview page speaks plain language and answers the main questions.
+	recPage := httptest.NewRecorder()
+	mux.ServeHTTP(recPage, httptest.NewRequest("GET", "/", nil))
+	body := recPage.Body.String()
+	if recPage.Code != 200 || !strings.Contains(body, "drop-off point") {
+		t.Errorf("overview page (code %d) missing the product explanation", recPage.Code)
+	}
+	if !strings.Contains(body, "default") || !strings.Contains(body, "10") {
+		t.Errorf("overview page missing stored-events row: %s", body)
+	}
+	if !strings.Contains(body, "6 events behind") {
+		t.Errorf("overview page missing plain lag verdict: %s", body)
 	}
 	rec2 := httptest.NewRecorder()
 	mux.ServeHTTP(rec2, httptest.NewRequest("GET", "/metrics", nil))
@@ -122,7 +142,7 @@ func TestAdminServerEndpoints(t *testing.T) {
 		t.Errorf("metrics endpoint missing relayforge_ families (code %d)", rec2.Code)
 	}
 	// Readiness gating.
-	mux2 := observability.NewAdminServer(reg, func() bool { return false })
+	mux2 := observability.NewAdminServer(reg, func() bool { return false }, nil)
 	rec3 := httptest.NewRecorder()
 	mux2.ServeHTTP(rec3, httptest.NewRequest("GET", "/healthz", nil))
 	if rec3.Code != 503 {

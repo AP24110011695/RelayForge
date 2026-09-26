@@ -1,69 +1,73 @@
-# Demo — showing behavior, not UI
+# The 4-step RelayForge demo
 
-The portfolio demonstration: every step shows a real system property.
-Run from the WSL2 ext4 checkout. Single-broker steps 1–12 cover the MVP;
-step 13 needs two brokers (Phase 10, fallback boundary).
+Show what the product does — no architecture slides. Every step uses the
+built binaries and proves one plain-language promise. (Deep technical
+narration lives in the other `docs/` files; bring it up only if asked.)
+
+Setup (once):
 
 ```sh
-# Terminal 0: build once
 go build -o /tmp/rf-demo/rfbroker ./cmd/rfbroker
 go build -o /tmp/rf-demo/relayctl ./cmd/relayctl
+/tmp/rf-demo/rfbroker                       # terminal 1 — Overview at http://localhost:7001/
 ```
 
-## Single broker (steps 1–12)
+## Step 1 — Send events
 
 ```sh
-# Start the broker + metrics (Prometheus/Grafana via docker compose when
-# Docker is available; /metrics works regardless).
-/tmp/rf-demo/rfbroker -addr 127.0.0.1:7000 -admin-addr 127.0.0.1:7001 -data-dir ~/rf-demo-data
+/tmp/rf-demo/relayctl produce -m "order 42 placed"
+/tmp/rf-demo/relayctl produce -m "file uploaded"
 ```
 
-1. **Produce events** — `... | relayctl produce -addr 127.0.0.1:7000`
-   (one message per stdin line) or `-m "hello"`.
-2. **Show partitions** — `relayctl topic create -name orders -partitions 4`
-   then `relayctl topic list`; produce with `-key user-1` and fetch each
-   partition: same keys always land in the same partition.
-3. **Consumers processing** — `relayctl consume -group workers -topic orders`
-   in 2–3 terminals: each shows its assigned partitions (generation printed).
-4. **Pause a consumer** — Ctrl-Z (or kill it): keep producing.
-5. **Consumer lag rises** — after the session timeout the survivors rebalance
-   and catch up; observe `relayforge_consumer_lag` on
-   `curl 127.0.0.1:7001/metrics` while paused (and Grafana when composed).
-6. **Bounded memory / backpressure** — stop ALL consumers, keep producing:
-   queues fill, then `relayforge_overloaded_total` increases and producers
-   get `RESOURCE_EXHAUSTED` — memory stays flat (that is the point).
-7. **Restart a consumer** — `relayctl consume ...` again: it rejoins, gets
-   its assignments, and resumes from committed offsets.
-8. **Catch-up** — watch lag gauges fall to 0.
-9. **Crash the broker** — `kill -9 <rfbroker-pid>` mid-load.
-10. **Recovery** — restart with the same `-data-dir`: the log recovers to
-    the longest valid prefix (`relayforge_recovery_truncated_bytes` shows
-    what a crash tore off), acked records are all present.
-11. **Benchmarks** — `rfbench -mode produce -ack written -records 20000`
-    and `-ack flushed`: the fsync cost is the latency difference.
-12. **p95/p99** — in the rfbench summary and the
-    `relayforge_append_latency_seconds` histogram.
+**Promise shown:** every event gets an immediate confirmation —
+`✓ stored as event #0` — meaning it is safely on disk before the
+command returns. The Overview page now lists the stream and its count.
 
-## Replication (step 13 — fallback boundary, two brokers)
+## Step 2 — Start receivers
 
 ```sh
-/tmp/rf-demo/rfbroker -addr 127.0.0.1:7100 -admin-addr 127.0.0.1:7101 -data-dir ~/rf-demo-leader
-/tmp/rf-demo/rfbroker -addr 127.0.0.1:7200 -admin-addr 127.0.0.1:7201 -data-dir ~/rf-demo-follower -replica-of 127.0.0.1:7100
-relayctl topic create -addr 127.0.0.1:7100 -name rep -partitions 1
-relayctl topic create -addr 127.0.0.1:7200 -name rep -partitions 1
-relayctl produce -addr 127.0.0.1:7100 -topic rep -m "r1"   # leader accepts
-relayctl produce -addr 127.0.0.1:7200 -topic rep -m "r2"   # follower REJECTS (UNAVAILABLE: not the leader)
-relayctl fetch   -addr 127.0.0.1:7200 -topic rep           # the copy is readable on the follower
-# Manual failover:
-kill -TERM <leader-pid>                                     # operator stops the old leader FIRST
-relayctl fetch -addr 127.0.0.1:7200 -topic rep              # unreplicated tail may be absent (async; report it)
-/tmp/rf-demo/rfbroker -addr 127.0.0.1:7200 ... -data-dir ~/rf-demo-follower   # restart WITHOUT -replica-of: promoted, epoch bumped
-relayctl produce -addr 127.0.0.1:7200 -topic rep -m "r3"   # promoted leader accepts
-# Restart the old leader WITH -replica-of 127.0.0.1:7200: it rejoins as follower.
+/tmp/rf-demo/relayctl consume -group workers -topic default   # terminal 2
+/tmp/rf-demo/relayctl consume -group audit   -topic default   # terminal 3
 ```
 
-Honesty note for the audience: this is async, manually-failed-over
-replication at the documented fallback boundary — not consensus, not HA.
-Split brain is prevented by procedure (stop the old leader first), not by
-machinery. docs/REPLICATION.md and docs/LIMITATIONS.md say exactly what
-the system does and does not guarantee.
+**Promise shown:** each receiver collects every event **in order**, prints
+`✓ caught up — listening for new events…`, and remembers where it stopped.
+Two independent groups each get their own complete copy of the stream.
+
+## Step 3 — Pause one receiver and watch the Overview
+
+Keep Step 1 producing; pause terminal 2 (Ctrl-Z, or just kill it).
+
+**Promise shown:** nothing breaks and nothing is dropped. The Overview page
+shows `workers` as **"N events behind"** while `audit` stays **"✓ caught
+up"** — per-receiver progress is tracked, not guessed.
+
+## Step 4 — Resume, crash, and prove recovery
+
+```sh
+fg     # resume the paused receiver — it catches up and says so
+kill -9 <rfbroker-pid>            # crash the broker mid-load
+/tmp/rf-demo/rfbroker             # restart with the same data dir
+```
+
+**Promise shown:** the restarted broker recovers to the last valid state
+(`relayforge_recovery_truncated_bytes` on `/metrics` shows exactly what a
+crash tore off), every acknowledged event is still there, and receivers
+pick up where they stopped.
+
+## Optional step — replication (Phase 10, documented fallback boundary)
+
+Two brokers: a leader and an async follower; kill the leader, restart the
+follower without its role, and it becomes the leader. Run the commands
+verbatim from [REPLICATION.md](REPLICATION.md) §"Manual failover procedure"
+and read its honesty note first: this is manually-failed-over async
+replication — not consensus, not HA.
+
+## Where the engineering lives (only if asked)
+
+[STORAGE.md](STORAGE.md) (segments, recovery) · [PROTOCOL.md](PROTOCOL.md)
+(gRPC API) · [ARCHITECTURE.md](ARCHITECTURE.md) (concurrency model) ·
+[FAILURE_MATRIX.md](FAILURE_MATRIX.md) (what fails and how it's tested) ·
+[BENCHMARKS.md](BENCHMARKS.md) (measured numbers) ·
+[OBSERVABILITY.md](OBSERVABILITY.md) (metrics) ·
+[REPLICATION.md](REPLICATION.md) / [LIMITATIONS.md](LIMITATIONS.md).

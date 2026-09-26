@@ -164,6 +164,7 @@ func cmdConsume(args []string) error {
 	committed := map[int32]uint64{}
 	pending := map[int32]uint64{} // next offset to commit per partition
 	processedSinceCommit := 0
+	caughtUpPrinted := false
 	for {
 		select {
 		case err := <-heartbeatFail:
@@ -172,10 +173,12 @@ func cmdConsume(args []string) error {
 				return err
 			}
 			committed = map[int32]uint64{}
+			caughtUpPrinted = false
 			fmt.Fprintf(os.Stderr, "consumer %s generation %d partitions %v\n", memberID, generation, keysOf(assigned))
 			continue
 		default:
 		}
+		processedAnything := false
 		for p := range assigned {
 			offset := committed[p]
 			if pending[p] > offset {
@@ -196,6 +199,7 @@ func cmdConsume(args []string) error {
 				fmt.Printf("p%d offset=%d ts=%d value=%s\n", p, rec.GetOffset(), rec.GetTimestampMs(), strconv.Quote(string(rec.GetValue())))
 				pending[p] = rec.GetOffset() + 1
 				processedSinceCommit++
+				processedAnything = true
 			}
 			if processedSinceCommit >= *commitAfter && len(pending) > 0 {
 				for part, next := range pending {
@@ -219,6 +223,13 @@ func cmdConsume(args []string) error {
 				}
 				processedSinceCommit = 0
 			}
+		}
+		if processedAnything {
+			caughtUpPrinted = false
+		} else if !caughtUpPrinted {
+			// Every assigned partition is at the log end: say so once.
+			caughtUpPrinted = true
+			fmt.Println("✓ caught up — listening for new events…")
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
@@ -427,7 +438,7 @@ func cmdProduce(args []string) error {
 		return err
 	}
 	for _, off := range resp.GetOffsets() {
-		fmt.Println(off)
+		fmt.Printf("✓ stored as event #%d\n", off)
 	}
 	return nil
 }
@@ -470,6 +481,13 @@ func cmdFetch(args []string) error {
 		fmt.Println(line)
 	}
 	fmt.Printf("next=%d high-watermark=%d\n", resp.GetNextOffset(), resp.GetHighWatermark())
+	if resp.GetNextOffset() == resp.GetHighWatermark() {
+		if len(resp.GetRecords()) == 0 {
+			fmt.Println("✓ nothing new yet — you're caught up")
+		} else {
+			fmt.Println("✓ you're caught up")
+		}
+	}
 	return nil
 }
 

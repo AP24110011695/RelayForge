@@ -78,7 +78,7 @@ func main() {
 	ready := false
 	admin := &http.Server{
 		Addr:              *adminAddr,
-		Handler:           observability.NewAdminServer(registry, func() bool { return ready }),
+		Handler:           observability.NewAdminServer(registry, func() bool { return ready }, b.OverviewSnapshot),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	adminErr := make(chan error, 1)

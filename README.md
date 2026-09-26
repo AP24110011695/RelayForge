@@ -1,98 +1,107 @@
 # RelayForge
 
-RelayForge is a durable, partitioned event-streaming platform: a Go event
-broker with a gRPC API, an append-only segment-based log storage engine,
-consumer groups with at-least-once delivery, and — only after all of that is
-proven — limited leader/follower replication with manual failover.
+**Your app's dependable drop-off point for updates.**
 
-It is deliberately **not** a Kafka clone, and it is not an AI project. The
-deliverable is a set of precisely stated, test-backed guarantees (ordering,
-durability per ack mode, valid-prefix crash recovery, backpressure, delivery
-semantics, group fencing) plus reproducible benchmarks.
+You send RelayForge events — "order 42 placed", "file uploaded" — and it
+keeps them safe on disk. Any number of receivers then collect them at their
+own pace, each remembering exactly where it stopped. If anything crashes —
+including RelayForge itself — nothing that was confirmed is lost.
 
-## Status
+RelayForge is for developers building apps whose parts need the same
+updates without being wired directly together: your checkout says
+"order placed" once, and email, inventory, and analytics each get it,
+on their own schedule.
 
-**Phase 5–10 of 10 complete — MVP (Phases 5–9) and the Phase 10 replication
-fallback boundary.**
+## What you give it
 
-- **Broker (Phase 5)**: unary gRPC/protobuf API (Produce/Fetch with ack
-  modes, status mapping, health, interceptors), `rfbroker` + `relayctl`
-  ([docs/PROTOCOL.md](docs/PROTOCOL.md)).
-- **Topics & partitions (Phase 6)**: fixed partition counts, FNV-1a key
-  routing + round-robin, per-partition bounded queues with enforced
-  backpressure, writer-panic containment, CRC-protected metadata
-  ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
-- **Consumer groups (Phase 7)**: durable per-group offset logs, generation
-  fencing persisted across restarts, session-timeout membership, reference
-  consumer (`relayctl consume`).
-- **Observability (Phase 8)**: Prometheus metrics + consumer-lag collector,
-  admin server (`/metrics`, pprof, `/healthz`), failure matrix
-  ([docs/OBSERVABILITY.md](docs/OBSERVABILITY.md),
-  [docs/FAILURE_MATRIX.md](docs/FAILURE_MATRIX.md)).
-- **Benchmarks (Phase 9)**: `rfbench` harness, recorded results +
-  profile-driven optimization loop
-  ([docs/BENCHMARKS.md](docs/BENCHMARKS.md)).
-- **Replication (Phase 10)**: async single-follower replication, manual
-  failover with persisted epochs — the documented **fallback boundary**,
-  not consensus/HA ([docs/REPLICATION.md](docs/REPLICATION.md),
-  [docs/LIMITATIONS.md](docs/LIMITATIONS.md)).
-- Demo walkthrough: [docs/DEMO.md](docs/DEMO.md).
+**Events** — small messages, sent by a program or typed at the command line.
 
-Authoritative documents: [PLAN.md](PLAN.md) (10-phase roadmap) and
-[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) (agent operating manual).
+## What it does
 
-Authoritative documents:
+1. **Confirms each event is safely on disk** before acknowledging it
+   (survives process crashes; `flushed` mode is intended to survive power
+   loss).
+2. **Keeps events in order** per stream and hands each one to every
+   receiver group.
+3. **Remembers where each receiver stopped** — slow, paused, or crashed
+   receivers resume where they left off, with nothing missed.
+4. **Slows senders down instead of dropping anything** when receivers fall
+   behind (bounded memory, explicit overload signals).
 
-- [PLAN.md](PLAN.md) — the 10-phase master execution roadmap.
-- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) — the coding-agent
-  operating manual (the `Execute Phase N` workflow).
+## What you get
 
-The 15-phase `ROADMAP.md` and per-phase `PHASE-1-PLAN.md` from the previous
-planning round were retired in favor of `PLAN.md` (see
-[docs/DESIGN_DECISIONS.md](docs/DESIGN_DECISIONS.md), ADR-2; both remain
-recoverable from git history).
+- Instant confirmation per event: `✓ stored as event #41`.
+- Every receiver sees events in order and resumes where it stopped.
+- One **Overview page** with the whole picture in plain language: what's
+  stored, which receivers are caught up, who's behind and by how much, and
+  recovery proof after a crash.
 
-## Core guarantees (target contract)
+## Quickstart (3 steps)
 
-- **Ordering** within a partition only — never global, never cross-partition.
-- **Durability ack modes**: `ack=flushed` (fsync before ack), `ack=written`
-  (page cache; default design target), `ack=none`.
-- **Delivery**: at-least-once; duplicates are possible and documented. Not
-  exactly-once.
-- **Recovery**: crash → longest valid prefix; torn/corrupt tails are
-  truncated, never served.
-- **Backpressure**: bounded queues; explicit overload errors; unbounded
-  memory is a bug.
-- **Replication (Phase 10)**: leader/follower, ISR, high-watermark, manual
-  failover — explicitly not consensus, not HA, not exactly-once.
+Requires Go + WSL2/Linux (see [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)).
 
-Full definitions: [PLAN.md §2](PLAN.md).
+```sh
+go build -o rfbroker ./cmd/rfbroker && go build -o relayctl ./cmd/relayctl
 
-## Development
+# 1. Start the broker (Overview page at http://localhost:7001/)
+./rfbroker
 
-```bash
-make build      # go build ./...
-make test       # go test ./...
-make test-race  # go test -race ./...
-make vet        # go vet ./...  + gofmt -l .
-make fmt        # gofmt -l -w .
-make fuzz       # run each fuzz target for FUZZTIME (first target: Phase 2)
+# 2. Send events (any terminal)
+./relayctl produce -m "order 42 placed"
+./relayctl produce -m "hello world"
+
+# 3. Start a receiver (another terminal) — watch it collect and confirm
+./relayctl consume -group workers -topic default
 ```
 
-- Environment: WSL2 (Ubuntu 26.04 LTS), Go 1.27.1, local git repository (no
-  remote, by policy). All build/test/benchmark execution runs in WSL on
-  ext4 — never against `/mnt/c` (see [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)).
-- Architecture decisions: [docs/DESIGN_DECISIONS.md](docs/DESIGN_DECISIONS.md).
+Tip: `echo "one per line" | ./relayctl produce` sends a whole batch from
+stdin.
 
-Current layout:
+Open **http://localhost:7001/** — the Overview page shows what's stored and
+where every receiver is, in plain words.
 
-```text
-PLAN.md, IMPLEMENTATION_PLAN.md   # roadmap + agent operating manual
-docs/                             # environment, storage, guarantees, formats, decisions
-internal/framing/                 # length-prefix wire framing (tested + fuzzed)
-internal/logengine/               # segment-set log engine (durability, recovery, retention)
-internal/record/                  # record format v1 (golden + fuzz tested)
-internal/version/                 # build information
-```
+### See why it matters (the 4-step demo)
 
-The tree grows only when its functionality exists.
+[docs/DEMO.md](docs/DEMO.md) walks the payoff: pause a receiver and watch
+it fall behind → restart it and watch it catch up → crash the broker with
+`kill -9` → restart it and confirm every acknowledged event survived.
+
+## Command overview
+
+| Command | What it does |
+| --- | --- |
+| `rfbroker` | runs the broker (+ Overview/metrics on the admin port) |
+| `relayctl produce` | send events |
+| `relayctl consume` | run a receiver that collects, confirms, and resumes |
+| `relayctl topic create/list/describe` | manage streams (partition counts are fixed at creation) |
+| `relayctl group describe` | who's in a receiver group and where they are |
+| `rfbench` | load generator + benchmark driver |
+
+## Technical details
+
+The user-facing layer above sits on a deliberately deep engineering core —
+all of it documented, tested (unit/integration/race/fuzz), and benchmarked:
+
+- **Storage**: append-only segment logs, sparse indexes, CRC32C record
+  format, crash recovery to the longest valid prefix, retention
+  — [docs/STORAGE.md](docs/STORAGE.md), [docs/RECORD_FORMAT.md](docs/RECORD_FORMAT.md),
+  [docs/GUARANTEES.md](docs/GUARANTEES.md)
+- **Wire & API**: gRPC/protobuf, unary RPCs, status mapping
+  — [docs/PROTOCOL.md](docs/PROTOCOL.md), [api/proto/](api/proto/)
+- **Concurrency**: per-partition single-writer ordering, bounded queues,
+  backpressure — [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **Consumer groups**: generation fencing, durable offsets
+  — [docs/GUARANTEES.md](docs/GUARANTEES.md)
+- **Reliability**: failure matrix with automated verification
+  — [docs/FAILURE_MATRIX.md](docs/FAILURE_MATRIX.md)
+- **Performance**: methodology + recorded results
+  — [docs/BENCHMARKS.md](docs/BENCHMARKS.md)
+- **Operations**: metrics, pprof, health
+  — [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md), admin port `:7001`
+- **Replication**: async follower + manual failover (documented fallback
+  boundary — not consensus, not HA)
+  — [docs/REPLICATION.md](docs/REPLICATION.md),
+  [docs/LIMITATIONS.md](docs/LIMITATIONS.md)
+- **Environment**: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)
+- Roadmap and agent workflow: [PLAN.md](PLAN.md),
+  [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)

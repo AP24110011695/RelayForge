@@ -229,9 +229,11 @@ func itoa(i int) string {
 	return string(b[pos:])
 }
 
-// NewAdminServer builds the admin HTTP mux: /metrics, /debug/pprof/*,
-// /healthz. readiness reports whether the broker is serving.
-func NewAdminServer(reg *prometheus.Registry, readiness func() bool) *http.ServeMux {
+// NewAdminServer builds the admin HTTP mux: the plain-language Overview
+// page at / (when an overview source is provided), /metrics,
+// /debug/pprof/*, /healthz. readiness reports whether the broker is
+// serving.
+func NewAdminServer(reg *prometheus.Registry, readiness func() bool, overview func() OverviewData) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
@@ -242,6 +244,9 @@ func NewAdminServer(reg *prometheus.Registry, readiness func() bool) *http.Serve
 		}
 		http.Error(w, "not ready", http.StatusServiceUnavailable)
 	})
+	if overview != nil {
+		mux.Handle("/", OverviewHandler(overview))
+	}
 	mux.HandleFunc("/debug/pprof/", pprof.Index)
 	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
 	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
