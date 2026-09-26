@@ -78,9 +78,10 @@ func TestGroupsTwoMembersDisjointAssignment(t *testing.T) {
 	}
 	// Member 1 holds the current generation: a valid commit lands.
 	gen3, _, a1cur := joinAndSync(t, env, "app", "events", id1, 60000)
+	target := firstOf(a1cur)
 	if _, err := env.client.CommitOffset(context.Background(), &relayforgev1.CommitOffsetRequest{
 		Group: "app", GenerationId: gen3, MemberId: id1, Topic: "events",
-		Partition: firstOf(a1cur), Offset: 7,
+		Partition: target, Offset: 7,
 	}); err != nil {
 		t.Fatalf("valid commit: %v", err)
 	}
@@ -90,7 +91,7 @@ func TestGroupsTwoMembersDisjointAssignment(t *testing.T) {
 	}
 	found := false
 	for _, o := range gresp.GetOffsets() {
-		if o.GetPartition() == firstOf(a1cur) && o.GetOffset() == 7 && o.GetCommitted() {
+		if o.GetPartition() == target && o.GetOffset() == 7 && o.GetCommitted() {
 			found = true
 		}
 	}

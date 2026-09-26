@@ -17,6 +17,7 @@ import (
 	"relayforge/internal/group"
 	"relayforge/internal/logengine"
 	"relayforge/internal/metadata"
+	"relayforge/internal/observability"
 	"relayforge/internal/record"
 )
 
@@ -27,17 +28,17 @@ const (
 )
 
 // NewServer wires the broker into a gRPC server: the RelayForge service,
-// the health protocol, message-size limits, and the recovery + logging
-// interceptors. Serving status must be set by the caller once ready
+// the health protocol, message-size limits, and the recovery + logging +
+// metrics interceptors. Serving status must be set by the caller once ready
 // (health.NewServer() is returned registered on the server).
-func NewServer(b *Broker, log *slog.Logger) (*grpc.Server, *health.Server) {
+func NewServer(b *Broker, log *slog.Logger, metrics *observability.Metrics) (*grpc.Server, *health.Server) {
 	if log == nil {
 		log = slog.Default()
 	}
 	srv := grpc.NewServer(
 		grpc.MaxRecvMsgSize(MaxRecvMsgSize),
 		grpc.MaxSendMsgSize(MaxSendMsgSize),
-		grpc.ChainUnaryInterceptor(recoveryInterceptor(log), loggingInterceptor(log)),
+		grpc.ChainUnaryInterceptor(recoveryInterceptor(log), metrics.RPCInterceptor(), loggingInterceptor(log)),
 	)
 	relayforgev1.RegisterRelayForgeServer(srv, &server{b: b})
 	hs := health.NewServer()

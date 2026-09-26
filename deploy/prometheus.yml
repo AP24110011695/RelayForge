@@ -1,0 +1,5 @@
+scrape_configs:
+  - job_name: relayforge
+    scrape_interval: 2s
+    static_configs:
+      - targets: ["broker:7001"]

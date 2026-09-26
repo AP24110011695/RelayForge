@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
@@ -20,6 +21,7 @@ import (
 
 	relayforgev1 "relayforge/api/proto/relayforge/v1"
 	"relayforge/internal/logengine"
+	"relayforge/internal/observability"
 	"relayforge/internal/version"
 )
 
@@ -180,19 +182,27 @@ func TestFetchStopsAtSegmentBoundary(t *testing.T) {
 // --- gRPC integration over bufconn ---
 
 type grpcEnv struct {
-	dir    string
-	b      *Broker
-	srv    *grpc.Server
-	conn   *grpc.ClientConn
-	client relayforgev1.RelayForgeClient
+	dir     string
+	b       *Broker
+	srv     *grpc.Server
+	conn    *grpc.ClientConn
+	client  relayforgev1.RelayForgeClient
+	reg     *prometheus.Registry
+	metrics *observability.Metrics
 }
 
 func startGRPC(t *testing.T) *grpcEnv {
 	t.Helper()
 	dir := t.TempDir()
 	lis := bufconnListener()
-	b := openBrokerAt(t, dir)
-	srv, hs := NewServer(b, testLogger())
+	reg := prometheus.NewRegistry()
+	metrics := observability.New(reg)
+	b, err := Open(Options{DataDir: dir, Metrics: metrics})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = b.Close() })
+	srv, hs := NewServer(b, testLogger(), metrics)
 	hs.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 	go func() { _ = srv.Serve(lis) }()
 	t.Cleanup(srv.Stop)
@@ -205,7 +215,7 @@ func startGRPC(t *testing.T) *grpcEnv {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { conn.Close() })
-	return &grpcEnv{dir: dir, b: b, srv: srv, conn: conn, client: relayforgev1.NewRelayForgeClient(conn)}
+	return &grpcEnv{dir: dir, b: b, srv: srv, conn: conn, client: relayforgev1.NewRelayForgeClient(conn), reg: reg, metrics: metrics}
 }
 
 func TestGRPCProduceFetch(t *testing.T) {
@@ -365,10 +375,11 @@ func TestGRPCConcurrentProduceFetch(t *testing.T) {
 
 func TestGracefulShutdownDrainsInFlight(t *testing.T) {
 	lis := bufconnListener()
-	b, _ := openBroker(t)
-	srv, hs := NewServer(b, testLogger())
+	b := openBrokerAt(t, t.TempDir())
+	srv, hs := NewServer(b, testLogger(), nil)
 	hs.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
 	conn, err := grpc.NewClient("passthrough:///bufnet",
 		grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
 			return lis.DialContext(ctx)

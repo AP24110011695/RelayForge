@@ -1,0 +1,67 @@
+{
+  "title": "RelayForge Overview",
+  "uid": "relayforge-overview",
+  "schemaVersion": 39,
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Produce throughput (msg/s) — answers: is the broker keeping up with producers?",
+      "targets": [{ "expr": "rate(relayforge_messages_in_total[1m])", "legendFormat": "{{topic}}/{{partition}}" }],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consume throughput (msg/s) — answers: are consumers draining?",
+      "targets": [{ "expr": "rate(relayforge_messages_out_total[1m])", "legendFormat": "{{topic}}/{{partition}}" }],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Append latency p95 by ack mode — answers: what does durability cost?",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(relayforge_append_latency_seconds_bucket[5m])) by (le, ack))", "legendFormat": "{{ack}}" }
+      ],
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Consumer lag — answers: who is falling behind and by how much?",
+      "targets": [{ "expr": "relayforge_consumer_lag", "legendFormat": "{{group}}/{{topic}}/{{partition}}" }],
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue depth — answers: is backpressure about to bite?",
+      "targets": [{ "expr": "relayforge_queue_depth", "legendFormat": "{{topic}}/{{partition}}" }],
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
+    },
+    {
+      "type": "stat",
+      "title": "Overload rejections",
+      "targets": [{ "expr": "increase(relayforge_overloaded_total[15m])" }],
+      "gridPos": { "x": 12, "y": 16, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "Partition writer failures",
+      "targets": [{ "expr": "increase(relayforge_partition_writer_failures_total[15m])" }],
+      "gridPos": { "x": 18, "y": 16, "w": 6, "h": 4 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Goroutines — answers: are we leaking?",
+      "targets": [{ "expr": "go_goroutines", "legendFormat": "goroutines" }],
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC error rate by code",
+      "targets": [
+        { "expr": "sum(rate(relayforge_rpc_requests_total[5m])) by (code) and on() (code != 'OK')", "legendFormat": "{{code}}" }
+      ],
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 }
+    }
+  ]
+}

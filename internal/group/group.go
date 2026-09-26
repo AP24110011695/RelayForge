@@ -257,6 +257,29 @@ func (c *Coordinator) Describe(group string) (int64, []MemberInfo, error) {
 	return g.generation, out, nil
 }
 
+// Groups lists the known group names (with any state: members or commits).
+func (c *Coordinator) Groups() []string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	out := make([]string, 0, len(c.groups))
+	for name := range c.groups {
+		out = append(out, name)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// CommittedAll returns the full committed-offset table of a group.
+func (c *Coordinator) CommittedAll(group string) (map[int32]uint64, bool) {
+	c.mu.Lock()
+	manager, err := c.managerLocked(group)
+	c.mu.Unlock()
+	if err != nil {
+		return nil, false
+	}
+	return manager.All(), true
+}
+
 // Close stops the janitor and closes the offsets managers.
 func (c *Coordinator) Close() {
 	c.mu.Lock()

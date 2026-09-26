@@ -1,0 +1,40 @@
+# RelayForge observability demo stack (Phase 8).
+# NOTE: authored but NOT verified live — Docker Desktop WSL integration was
+# disabled at execution time (docs/ENVIRONMENT.md). Verify with
+# `docker compose up -d && docker compose ps` after enabling it.
+services:
+  broker:
+    build: .
+    ports:
+      - "7000:7000"
+      - "7001:7001"
+    volumes:
+      - broker-data:/data
+    healthcheck:
+      test: ["CMD", "/relayctl", "health", "-addr", "127.0.0.1:7000"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:12.4.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./deploy/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./deploy/dashboards:/etc/grafana/provisioning/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  broker-data:

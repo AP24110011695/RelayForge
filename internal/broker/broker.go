@@ -20,6 +20,7 @@ import (
 	"relayforge/internal/group"
 	"relayforge/internal/logengine"
 	"relayforge/internal/metadata"
+	"relayforge/internal/observability"
 	"relayforge/internal/offsets"
 	"relayforge/internal/record"
 )
@@ -104,6 +105,7 @@ type Options struct {
 	MaxRecordSize     int           // passthrough to the log engine
 	FetchPollInterval time.Duration // long-poll cadence; 0 selects the default
 	ProduceQueueDepth int           // bounded per-partition queue; 0 selects the default
+	Metrics           *observability.Metrics
 }
 
 type partition struct {
@@ -113,6 +115,7 @@ type partition struct {
 	queue     chan produceItem
 	done      chan struct{}
 	failed    atomic.Bool
+	metrics   *observability.Metrics
 	writeHook func() // test-only stall point before the append; nil in production
 }
 
@@ -135,6 +138,7 @@ type Broker struct {
 	store         *metadata.Store
 	parts         map[string][]*partition // topic -> partitions
 	groups        *group.Coordinator
+	metrics       *observability.Metrics
 	queueDepth    int
 	maxRecordSize int
 	rr            atomic.Uint32 // keyless round-robin counter
@@ -165,6 +169,7 @@ func Open(opts Options) (*Broker, error) {
 		parts:         map[string][]*partition{},
 		queueDepth:    depth,
 		maxRecordSize: opts.MaxRecordSize,
+		metrics:       opts.Metrics,
 		fetchPoll:     poll,
 	}
 	if _, ok := store.Get(DefaultTopic); !ok {
@@ -191,6 +196,13 @@ func Open(opts Options) (*Broker, error) {
 		}
 		return t.PartitionCount, true
 	}, 0)
+	var recovered int64
+	for _, list := range b.parts {
+		for _, p := range list {
+			recovered += p.log.TruncatedOnRecover()
+		}
+	}
+	b.metrics.RecoveryObs(recovered)
 	return b, nil
 }
 
@@ -201,11 +213,12 @@ func (b *Broker) openPartition(topic string, id int32) (*partition, error) {
 		return nil, err
 	}
 	p := &partition{
-		topic: topic,
-		id:    id,
-		log:   log,
-		queue: make(chan produceItem, b.queueDepth),
-		done:  make(chan struct{}),
+		topic:   topic,
+		id:      id,
+		log:     log,
+		queue:   make(chan produceItem, b.queueDepth),
+		done:    make(chan struct{}),
+		metrics: b.metrics,
 	}
 	go p.writerLoop()
 	return p, nil
@@ -230,14 +243,29 @@ func (p *partition) process(item produceItem) {
 	defer func() {
 		if r := recover(); r != nil {
 			p.failed.Store(true)
+			p.metrics.PartitionFailInc()
 			item.result <- produceResult{err: fmt.Errorf("%w: %v", ErrPartitionFailed, r)}
 		}
 	}()
 	if p.writeHook != nil {
 		p.writeHook()
 	}
+	start := time.Now()
 	off, err := p.log.Append(item.rec, item.dur)
+	p.metrics.ProduceObs(p.topic, p.id, 1, len(item.rec.Key)+len(item.rec.Value), ackName(item.dur), time.Since(start))
+	p.metrics.QueueObs(p.topic, p.id, len(p.queue))
 	item.result <- produceResult{offset: off, err: err}
+}
+
+func ackName(d logengine.Durability) string {
+	switch d {
+	case logengine.DurabilityFlushed:
+		return "flushed"
+	case logengine.DurabilityNone:
+		return "none"
+	default:
+		return "written"
+	}
 }
 
 // CreateTopic adds a topic with a fixed partition count (resizing is not
@@ -359,6 +387,7 @@ func (b *Broker) Produce(ctx context.Context, topic string, partitionID int32, a
 			select {
 			case g.p.queue <- g.items[j]:
 			case <-ctx.Done():
+				b.metrics.OverloadInc()
 				return nil, fmt.Errorf("%w: queue full for partition %d while submitting: %v",
 					ErrOverloaded, pid, ctx.Err())
 			}
@@ -422,6 +451,7 @@ func (b *Broker) Fetch(ctx context.Context, topic string, partitionID int32, off
 	if maxWait > 0 {
 		deadline = time.Now().Add(maxWait)
 	}
+	start := time.Now()
 	for {
 		if err := ctx.Err(); err != nil {
 			return nil, 0, 0, err
@@ -432,6 +462,11 @@ func (b *Broker) Fetch(ctx context.Context, topic string, partitionID int32, off
 			return nil, 0, 0, err
 		}
 		if len(recs) > 0 {
+			var bytesOut int
+			for _, r := range recs {
+				bytesOut += len(r.Key) + len(r.Value)
+			}
+			b.metrics.FetchObs(topic, partitionID, len(recs), bytesOut, time.Since(start))
 			return convert(offset, recs), next, p.log.NextOffset(), nil
 		}
 		if next > offset {
@@ -488,7 +523,13 @@ func (b *Broker) Close() error {
 // JoinGroup adds (or re-joins) a member to a consumer group and triggers a
 // rebalance.
 func (b *Broker) JoinGroup(group, memberID, topic string, sessionTimeout time.Duration) (int64, string, error) {
-	return b.groups.Join(group, memberID, topic, sessionTimeout)
+	gen, id, err := b.groups.Join(group, memberID, topic, sessionTimeout)
+	if err == nil {
+		if _, members, derr := b.groups.Describe(group); derr == nil {
+			b.metrics.MembersObs(group, len(members))
+		}
+	}
+	return gen, id, err
 }
 
 // SyncGroup returns the member's subscribed topic and its assignment for
@@ -504,10 +545,19 @@ func (b *Broker) Heartbeat(group string, generation int64, memberID string) erro
 
 // CommitOffset durably stores a fenced offset commit. The committed offset
 // is the NEXT offset to consume.
-func (b *Broker) CommitOffset(group string, generation int64, memberID, topic string, partition int32, offset uint64) error {
-	return b.groups.Commit(group, generation, memberID, offsets.Record{
+func (b *Broker) CommitOffset(groupID string, generation int64, memberID, topic string, partition int32, offset uint64) error {
+	err := b.groups.Commit(groupID, generation, memberID, offsets.Record{
 		Topic: topic, Partition: partition, Offset: offset,
 	})
+	switch {
+	case err == nil:
+		b.metrics.CommitObs("ok")
+	case errors.Is(err, group.ErrFencedGeneration):
+		b.metrics.CommitObs("fenced")
+	default:
+		b.metrics.CommitObs("error")
+	}
+	return err
 }
 
 // GetOffsets returns committed offsets for the requested partitions (0
@@ -542,6 +592,30 @@ func (b *Broker) GetOffsets(group, topic string, partitions []int32) ([]offsets.
 // DescribeGroup returns the generation and member assignments.
 func (b *Broker) DescribeGroup(group string) (int64, []group.MemberInfo, error) {
 	return b.groups.Describe(group)
+}
+
+// LagSnapshot computes consumer lag (log end minus committed offset) for
+// every known group over this broker's partitions, fresh at call time.
+func (b *Broker) LagSnapshot() []observability.LagRow {
+	b.mu.RLock()
+	parts := b.parts
+	b.mu.RUnlock()
+	var out []observability.LagRow
+	for _, g := range b.groups.Groups() {
+		committed, ok := b.groups.CommittedAll(g)
+		if !ok {
+			continue
+		}
+		for topic, list := range parts {
+			for _, p := range list {
+				hw := p.log.NextOffset()
+				if c, ok := committed[p.id]; ok && hw >= c {
+					out = append(out, observability.LagRow{Group: g, Topic: topic, Partition: p.id, Lag: hw - c})
+				}
+			}
+		}
+	}
+	return out
 }
 
 func (b *Broker) closePartsAndWait(parts map[string][]*partition) {
