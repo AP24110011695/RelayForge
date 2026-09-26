@@ -124,12 +124,16 @@ func decodePayload(payload []byte) (Record, error) {
 	if payload[0] != PayloadVersion {
 		return Record{}, fmt.Errorf("%w: version %d", ErrUnsupportedPayload, payload[0])
 	}
+	partition := int32(binary.LittleEndian.Uint32(payload[1:5]))
+	if partition < 0 {
+		return Record{}, fmt.Errorf("%w: negative partition %d", ErrMalformedPayload, partition)
+	}
 	topicLen := binary.LittleEndian.Uint32(payload[13:17])
 	if int(topicLen) != len(payload)-MinPayloadSize {
 		return Record{}, fmt.Errorf("%w: topic length %d does not match payload", ErrMalformedPayload, topicLen)
 	}
 	return Record{
-		Partition: int32(binary.LittleEndian.Uint32(payload[1:5])),
+		Partition: partition,
 		Offset:    binary.LittleEndian.Uint64(payload[5:13]),
 		Topic:     string(payload[17:]),
 	}, nil
@@ -137,6 +141,6 @@ func decodePayload(payload []byte) (Record, error) {
 
 // Errors for the commit-payload decoder.
 var (
-	ErrMalformedPayload   = errors.New("offsets: malformed commit payload")
-	ErrUnsupportedPayload = errors.New("offsets: unsupported commit payload version")
+	ErrMalformedPayload     = errors.New("offsets: malformed commit payload")
+	ErrUnsupportedPayload   = errors.New("offsets: unsupported commit payload version")
 )
