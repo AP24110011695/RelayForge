@@ -27,6 +27,12 @@ const (
 	RelayForge_CreateTopic_FullMethodName   = "/relayforge.v1.RelayForge/CreateTopic"
 	RelayForge_ListTopics_FullMethodName    = "/relayforge.v1.RelayForge/ListTopics"
 	RelayForge_DescribeTopic_FullMethodName = "/relayforge.v1.RelayForge/DescribeTopic"
+	RelayForge_JoinGroup_FullMethodName     = "/relayforge.v1.RelayForge/JoinGroup"
+	RelayForge_SyncGroup_FullMethodName     = "/relayforge.v1.RelayForge/SyncGroup"
+	RelayForge_Heartbeat_FullMethodName     = "/relayforge.v1.RelayForge/Heartbeat"
+	RelayForge_CommitOffset_FullMethodName  = "/relayforge.v1.RelayForge/CommitOffset"
+	RelayForge_GetOffsets_FullMethodName    = "/relayforge.v1.RelayForge/GetOffsets"
+	RelayForge_DescribeGroup_FullMethodName = "/relayforge.v1.RelayForge/DescribeGroup"
 )
 
 // RelayForgeClient is the client API for RelayForge service.
@@ -38,6 +44,12 @@ type RelayForgeClient interface {
 	CreateTopic(ctx context.Context, in *CreateTopicRequest, opts ...grpc.CallOption) (*CreateTopicResponse, error)
 	ListTopics(ctx context.Context, in *ListTopicsRequest, opts ...grpc.CallOption) (*ListTopicsResponse, error)
 	DescribeTopic(ctx context.Context, in *DescribeTopicRequest, opts ...grpc.CallOption) (*DescribeTopicResponse, error)
+	JoinGroup(ctx context.Context, in *JoinGroupRequest, opts ...grpc.CallOption) (*JoinGroupResponse, error)
+	SyncGroup(ctx context.Context, in *SyncGroupRequest, opts ...grpc.CallOption) (*SyncGroupResponse, error)
+	Heartbeat(ctx context.Context, in *HeartbeatRequest, opts ...grpc.CallOption) (*HeartbeatResponse, error)
+	CommitOffset(ctx context.Context, in *CommitOffsetRequest, opts ...grpc.CallOption) (*CommitOffsetResponse, error)
+	GetOffsets(ctx context.Context, in *GetOffsetsRequest, opts ...grpc.CallOption) (*GetOffsetsResponse, error)
+	DescribeGroup(ctx context.Context, in *DescribeGroupRequest, opts ...grpc.CallOption) (*DescribeGroupResponse, error)
 }
 
 type relayForgeClient struct {
@@ -98,6 +110,66 @@ func (c *relayForgeClient) DescribeTopic(ctx context.Context, in *DescribeTopicR
 	return out, nil
 }
 
+func (c *relayForgeClient) JoinGroup(ctx context.Context, in *JoinGroupRequest, opts ...grpc.CallOption) (*JoinGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JoinGroupResponse)
+	err := c.cc.Invoke(ctx, RelayForge_JoinGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *relayForgeClient) SyncGroup(ctx context.Context, in *SyncGroupRequest, opts ...grpc.CallOption) (*SyncGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SyncGroupResponse)
+	err := c.cc.Invoke(ctx, RelayForge_SyncGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *relayForgeClient) Heartbeat(ctx context.Context, in *HeartbeatRequest, opts ...grpc.CallOption) (*HeartbeatResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HeartbeatResponse)
+	err := c.cc.Invoke(ctx, RelayForge_Heartbeat_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *relayForgeClient) CommitOffset(ctx context.Context, in *CommitOffsetRequest, opts ...grpc.CallOption) (*CommitOffsetResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommitOffsetResponse)
+	err := c.cc.Invoke(ctx, RelayForge_CommitOffset_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *relayForgeClient) GetOffsets(ctx context.Context, in *GetOffsetsRequest, opts ...grpc.CallOption) (*GetOffsetsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetOffsetsResponse)
+	err := c.cc.Invoke(ctx, RelayForge_GetOffsets_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *relayForgeClient) DescribeGroup(ctx context.Context, in *DescribeGroupRequest, opts ...grpc.CallOption) (*DescribeGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DescribeGroupResponse)
+	err := c.cc.Invoke(ctx, RelayForge_DescribeGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RelayForgeServer is the server API for RelayForge service.
 // All implementations must embed UnimplementedRelayForgeServer
 // for forward compatibility.
@@ -107,6 +179,12 @@ type RelayForgeServer interface {
 	CreateTopic(context.Context, *CreateTopicRequest) (*CreateTopicResponse, error)
 	ListTopics(context.Context, *ListTopicsRequest) (*ListTopicsResponse, error)
 	DescribeTopic(context.Context, *DescribeTopicRequest) (*DescribeTopicResponse, error)
+	JoinGroup(context.Context, *JoinGroupRequest) (*JoinGroupResponse, error)
+	SyncGroup(context.Context, *SyncGroupRequest) (*SyncGroupResponse, error)
+	Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatResponse, error)
+	CommitOffset(context.Context, *CommitOffsetRequest) (*CommitOffsetResponse, error)
+	GetOffsets(context.Context, *GetOffsetsRequest) (*GetOffsetsResponse, error)
+	DescribeGroup(context.Context, *DescribeGroupRequest) (*DescribeGroupResponse, error)
 	mustEmbedUnimplementedRelayForgeServer()
 }
 
@@ -131,6 +209,24 @@ func (UnimplementedRelayForgeServer) ListTopics(context.Context, *ListTopicsRequ
 }
 func (UnimplementedRelayForgeServer) DescribeTopic(context.Context, *DescribeTopicRequest) (*DescribeTopicResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DescribeTopic not implemented")
+}
+func (UnimplementedRelayForgeServer) JoinGroup(context.Context, *JoinGroupRequest) (*JoinGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method JoinGroup not implemented")
+}
+func (UnimplementedRelayForgeServer) SyncGroup(context.Context, *SyncGroupRequest) (*SyncGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SyncGroup not implemented")
+}
+func (UnimplementedRelayForgeServer) Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Heartbeat not implemented")
+}
+func (UnimplementedRelayForgeServer) CommitOffset(context.Context, *CommitOffsetRequest) (*CommitOffsetResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CommitOffset not implemented")
+}
+func (UnimplementedRelayForgeServer) GetOffsets(context.Context, *GetOffsetsRequest) (*GetOffsetsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetOffsets not implemented")
+}
+func (UnimplementedRelayForgeServer) DescribeGroup(context.Context, *DescribeGroupRequest) (*DescribeGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DescribeGroup not implemented")
 }
 func (UnimplementedRelayForgeServer) mustEmbedUnimplementedRelayForgeServer() {}
 func (UnimplementedRelayForgeServer) testEmbeddedByValue()                    {}
@@ -243,6 +339,114 @@ func _RelayForge_DescribeTopic_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RelayForge_JoinGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).JoinGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_JoinGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).JoinGroup(ctx, req.(*JoinGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RelayForge_SyncGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SyncGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).SyncGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_SyncGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).SyncGroup(ctx, req.(*SyncGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RelayForge_Heartbeat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HeartbeatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).Heartbeat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_Heartbeat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).Heartbeat(ctx, req.(*HeartbeatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RelayForge_CommitOffset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommitOffsetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).CommitOffset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_CommitOffset_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).CommitOffset(ctx, req.(*CommitOffsetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RelayForge_GetOffsets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOffsetsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).GetOffsets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_GetOffsets_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).GetOffsets(ctx, req.(*GetOffsetsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RelayForge_DescribeGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DescribeGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RelayForgeServer).DescribeGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RelayForge_DescribeGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RelayForgeServer).DescribeGroup(ctx, req.(*DescribeGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RelayForge_ServiceDesc is the grpc.ServiceDesc for RelayForge service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -269,6 +473,30 @@ var RelayForge_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DescribeTopic",
 			Handler:    _RelayForge_DescribeTopic_Handler,
+		},
+		{
+			MethodName: "JoinGroup",
+			Handler:    _RelayForge_JoinGroup_Handler,
+		},
+		{
+			MethodName: "SyncGroup",
+			Handler:    _RelayForge_SyncGroup_Handler,
+		},
+		{
+			MethodName: "Heartbeat",
+			Handler:    _RelayForge_Heartbeat_Handler,
+		},
+		{
+			MethodName: "CommitOffset",
+			Handler:    _RelayForge_CommitOffset_Handler,
+		},
+		{
+			MethodName: "GetOffsets",
+			Handler:    _RelayForge_GetOffsets_Handler,
+		},
+		{
+			MethodName: "DescribeGroup",
+			Handler:    _RelayForge_DescribeGroup_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

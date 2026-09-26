@@ -68,6 +68,97 @@ service RelayForge {
   rpc CreateTopic(CreateTopicRequest) returns (CreateTopicResponse);
   rpc ListTopics(ListTopicsRequest) returns (ListTopicsResponse);
   rpc DescribeTopic(DescribeTopicRequest) returns (DescribeTopicResponse);
+  rpc JoinGroup(JoinGroupRequest) returns (JoinGroupResponse);
+  rpc SyncGroup(SyncGroupRequest) returns (SyncGroupResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc CommitOffset(CommitOffsetRequest) returns (CommitOffsetResponse);
+  rpc GetOffsets(GetOffsetsRequest) returns (GetOffsetsResponse);
+  rpc DescribeGroup(DescribeGroupRequest) returns (DescribeGroupResponse);
+}
+
+// --- Consumer groups (Phase 7) ---
+//
+// Simplified protocol (docs/GUARANTEES.md): members join with an empty
+// member_id (the broker assigns one; re-join with the previously assigned
+// id), the broker computes balanced assignments at join/rebalance time,
+// and generation fencing rejects commits from stale members — a fenced
+// member must re-join. Membership ends via session timeout.
+
+message JoinGroupRequest {
+  string group = 1;
+  string member_id = 2;           // empty = new member
+  string topic = 3;               // single-topic subscription (MVP)
+  int32 session_timeout_ms = 4;   // membership ends after this without a heartbeat
+}
+
+message JoinGroupResponse {
+  int64 generation_id = 1;
+  string member_id = 2;
+}
+
+message PartitionAssignment {
+  string topic = 1;
+  repeated int32 partitions = 2;
+}
+
+message SyncGroupRequest {
+  string group = 1;
+  int64 generation_id = 2;
+  string member_id = 3;
+}
+
+message SyncGroupResponse {
+  repeated PartitionAssignment assignment = 1;
+}
+
+message HeartbeatRequest {
+  string group = 1;
+  int64 generation_id = 2;
+  string member_id = 3;
+}
+
+message HeartbeatResponse {}
+
+message CommitOffsetRequest {
+  string group = 1;
+  int64 generation_id = 2;
+  string member_id = 3;
+  string topic = 4;
+  int32 partition = 5;
+  // The committed offset is the NEXT offset to consume.
+  uint64 offset = 6;
+}
+
+message CommitOffsetResponse {}
+
+message GetOffsetsRequest {
+  string group = 1;
+  string topic = 2;
+  repeated int32 partitions = 3; // empty = all partitions of the topic
+}
+
+message OffsetInfo {
+  int32 partition = 1;
+  bool committed = 2;  // false when no commit exists for the partition
+  uint64 offset = 3;
+}
+
+message GetOffsetsResponse {
+  repeated OffsetInfo offsets = 1;
+}
+
+message DescribeGroupRequest {
+  string group = 1;
+}
+
+message GroupMember {
+  string member_id = 1;
+  repeated PartitionAssignment assignment = 2;
+}
+
+message DescribeGroupResponse {
+  int64 generation_id = 1;
+  repeated GroupMember members = 2;
 }
 
 message CreateTopicRequest {

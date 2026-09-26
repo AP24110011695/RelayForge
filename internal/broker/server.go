@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"sort"
 	"time"
 
 	"google.golang.org/grpc"
@@ -13,6 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 	relayforgev1 "relayforge/api/proto/relayforge/v1"
 
+	"relayforge/internal/group"
 	"relayforge/internal/logengine"
 	"relayforge/internal/metadata"
 	"relayforge/internal/record"
@@ -109,6 +111,10 @@ func toStatus(err error) error {
 		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, metadata.ErrTopicExists):
 		return status.Error(codes.AlreadyExists, err.Error())
+	case errors.Is(err, group.ErrFencedGeneration):
+		return status.Error(codes.FailedPrecondition, "FENCED: "+err.Error())
+	case errors.Is(err, group.ErrUnknownGroup), errors.Is(err, group.ErrUnknownMemberID), errors.Is(err, group.ErrUnknownTopic):
+		return status.Error(codes.NotFound, err.Error())
 	case errors.Is(err, ErrPartitionFailed), errors.Is(err, ErrClosed), errors.Is(err, logengine.ErrClosed):
 		return status.Error(codes.Unavailable, err.Error())
 	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, context.Canceled):
@@ -140,6 +146,82 @@ func (s *server) DescribeTopic(ctx context.Context, req *relayforgev1.DescribeTo
 		return nil, toStatus(err)
 	}
 	return &relayforgev1.DescribeTopicResponse{Topic: &relayforgev1.TopicInfo{Name: t.Name, PartitionCount: t.PartitionCount}}, nil
+}
+
+func (s *server) JoinGroup(ctx context.Context, req *relayforgev1.JoinGroupRequest) (*relayforgev1.JoinGroupResponse, error) {
+	generation, memberID, err := s.b.JoinGroup(req.GetGroup(), req.GetMemberId(), req.GetTopic(),
+		time.Duration(req.GetSessionTimeoutMs())*time.Millisecond)
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	return &relayforgev1.JoinGroupResponse{GenerationId: generation, MemberId: memberID}, nil
+}
+
+func (s *server) SyncGroup(ctx context.Context, req *relayforgev1.SyncGroupRequest) (*relayforgev1.SyncGroupResponse, error) {
+	topic, assignment, err := s.b.SyncGroup(req.GetGroup(), req.GetGenerationId(), req.GetMemberId())
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	var out []*relayforgev1.PartitionAssignment
+	if len(assignment) > 0 {
+		out = []*relayforgev1.PartitionAssignment{{Topic: topic, Partitions: sortedPartitions(assignment)}}
+	}
+	return &relayforgev1.SyncGroupResponse{Assignment: out}, nil
+}
+
+func (s *server) Heartbeat(ctx context.Context, req *relayforgev1.HeartbeatRequest) (*relayforgev1.HeartbeatResponse, error) {
+	if err := s.b.Heartbeat(req.GetGroup(), req.GetGenerationId(), req.GetMemberId()); err != nil {
+		return nil, toStatus(err)
+	}
+	return &relayforgev1.HeartbeatResponse{}, nil
+}
+
+func (s *server) CommitOffset(ctx context.Context, req *relayforgev1.CommitOffsetRequest) (*relayforgev1.CommitOffsetResponse, error) {
+	if err := s.b.CommitOffset(req.GetGroup(), req.GetGenerationId(), req.GetMemberId(),
+		req.GetTopic(), req.GetPartition(), req.GetOffset()); err != nil {
+		return nil, toStatus(err)
+	}
+	return &relayforgev1.CommitOffsetResponse{}, nil
+}
+
+func (s *server) GetOffsets(ctx context.Context, req *relayforgev1.GetOffsetsRequest) (*relayforgev1.GetOffsetsResponse, error) {
+	recs, err := s.b.GetOffsets(req.GetGroup(), req.GetTopic(), req.GetPartitions())
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	out := make([]*relayforgev1.OffsetInfo, len(recs))
+	for i, r := range recs {
+		out[i] = &relayforgev1.OffsetInfo{Partition: r.Partition, Committed: true, Offset: r.Offset}
+	}
+	return &relayforgev1.GetOffsetsResponse{Offsets: out}, nil
+}
+
+func (s *server) DescribeGroup(ctx context.Context, req *relayforgev1.DescribeGroupRequest) (*relayforgev1.DescribeGroupResponse, error) {
+	generation, members, err := s.b.DescribeGroup(req.GetGroup())
+	if err != nil {
+		return nil, toStatus(err)
+	}
+	out := make([]*relayforgev1.GroupMember, len(members))
+	for i, m := range members {
+		out[i] = &relayforgev1.GroupMember{
+			MemberId: m.ID,
+			Assignment: []*relayforgev1.PartitionAssignment{{
+				Topic:      m.Topic,
+				Partitions: sortedPartitions(m.Assignment),
+			}},
+		}
+	}
+	return &relayforgev1.DescribeGroupResponse{GenerationId: generation, Members: out}, nil
+}
+
+// sortedPartitions returns the assigned partitions in ascending order.
+func sortedPartitions(assignment map[int32]bool) []int32 {
+	out := make([]int32, 0, len(assignment))
+	for p := range assignment {
+		out = append(out, p)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	return out
 }
 
 func recoveryInterceptor(log *slog.Logger) grpc.UnaryServerInterceptor {

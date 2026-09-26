@@ -456,6 +456,811 @@ func (x *FetchResponse) GetHighWatermark() uint64 {
 	return 0
 }
 
+type JoinGroupRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Group            string                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	MemberId         string                 `protobuf:"bytes,2,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`                            // empty = new member
+	Topic            string                 `protobuf:"bytes,3,opt,name=topic,proto3" json:"topic,omitempty"`                                                  // single-topic subscription (MVP)
+	SessionTimeoutMs int32                  `protobuf:"varint,4,opt,name=session_timeout_ms,json=sessionTimeoutMs,proto3" json:"session_timeout_ms,omitempty"` // membership ends after this without a heartbeat
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *JoinGroupRequest) Reset() {
+	*x = JoinGroupRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinGroupRequest) ProtoMessage() {}
+
+func (x *JoinGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinGroupRequest.ProtoReflect.Descriptor instead.
+func (*JoinGroupRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *JoinGroupRequest) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+func (x *JoinGroupRequest) GetMemberId() string {
+	if x != nil {
+		return x.MemberId
+	}
+	return ""
+}
+
+func (x *JoinGroupRequest) GetTopic() string {
+	if x != nil {
+		return x.Topic
+	}
+	return ""
+}
+
+func (x *JoinGroupRequest) GetSessionTimeoutMs() int32 {
+	if x != nil {
+		return x.SessionTimeoutMs
+	}
+	return 0
+}
+
+type JoinGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GenerationId  int64                  `protobuf:"varint,1,opt,name=generation_id,json=generationId,proto3" json:"generation_id,omitempty"`
+	MemberId      string                 `protobuf:"bytes,2,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinGroupResponse) Reset() {
+	*x = JoinGroupResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinGroupResponse) ProtoMessage() {}
+
+func (x *JoinGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinGroupResponse.ProtoReflect.Descriptor instead.
+func (*JoinGroupResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *JoinGroupResponse) GetGenerationId() int64 {
+	if x != nil {
+		return x.GenerationId
+	}
+	return 0
+}
+
+func (x *JoinGroupResponse) GetMemberId() string {
+	if x != nil {
+		return x.MemberId
+	}
+	return ""
+}
+
+type PartitionAssignment struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Topic         string                 `protobuf:"bytes,1,opt,name=topic,proto3" json:"topic,omitempty"`
+	Partitions    []int32                `protobuf:"varint,2,rep,packed,name=partitions,proto3" json:"partitions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PartitionAssignment) Reset() {
+	*x = PartitionAssignment{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PartitionAssignment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PartitionAssignment) ProtoMessage() {}
+
+func (x *PartitionAssignment) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PartitionAssignment.ProtoReflect.Descriptor instead.
+func (*PartitionAssignment) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *PartitionAssignment) GetTopic() string {
+	if x != nil {
+		return x.Topic
+	}
+	return ""
+}
+
+func (x *PartitionAssignment) GetPartitions() []int32 {
+	if x != nil {
+		return x.Partitions
+	}
+	return nil
+}
+
+type SyncGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Group         string                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	GenerationId  int64                  `protobuf:"varint,2,opt,name=generation_id,json=generationId,proto3" json:"generation_id,omitempty"`
+	MemberId      string                 `protobuf:"bytes,3,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SyncGroupRequest) Reset() {
+	*x = SyncGroupRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SyncGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncGroupRequest) ProtoMessage() {}
+
+func (x *SyncGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncGroupRequest.ProtoReflect.Descriptor instead.
+func (*SyncGroupRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SyncGroupRequest) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+func (x *SyncGroupRequest) GetGenerationId() int64 {
+	if x != nil {
+		return x.GenerationId
+	}
+	return 0
+}
+
+func (x *SyncGroupRequest) GetMemberId() string {
+	if x != nil {
+		return x.MemberId
+	}
+	return ""
+}
+
+type SyncGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Assignment    []*PartitionAssignment `protobuf:"bytes,1,rep,name=assignment,proto3" json:"assignment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SyncGroupResponse) Reset() {
+	*x = SyncGroupResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SyncGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncGroupResponse) ProtoMessage() {}
+
+func (x *SyncGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncGroupResponse.ProtoReflect.Descriptor instead.
+func (*SyncGroupResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SyncGroupResponse) GetAssignment() []*PartitionAssignment {
+	if x != nil {
+		return x.Assignment
+	}
+	return nil
+}
+
+type HeartbeatRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Group         string                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	GenerationId  int64                  `protobuf:"varint,2,opt,name=generation_id,json=generationId,proto3" json:"generation_id,omitempty"`
+	MemberId      string                 `protobuf:"bytes,3,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HeartbeatRequest) Reset() {
+	*x = HeartbeatRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeartbeatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeartbeatRequest) ProtoMessage() {}
+
+func (x *HeartbeatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeartbeatRequest.ProtoReflect.Descriptor instead.
+func (*HeartbeatRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *HeartbeatRequest) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+func (x *HeartbeatRequest) GetGenerationId() int64 {
+	if x != nil {
+		return x.GenerationId
+	}
+	return 0
+}
+
+func (x *HeartbeatRequest) GetMemberId() string {
+	if x != nil {
+		return x.MemberId
+	}
+	return ""
+}
+
+type HeartbeatResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HeartbeatResponse) Reset() {
+	*x = HeartbeatResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HeartbeatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HeartbeatResponse) ProtoMessage() {}
+
+func (x *HeartbeatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HeartbeatResponse.ProtoReflect.Descriptor instead.
+func (*HeartbeatResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{12}
+}
+
+type CommitOffsetRequest struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Group        string                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	GenerationId int64                  `protobuf:"varint,2,opt,name=generation_id,json=generationId,proto3" json:"generation_id,omitempty"`
+	MemberId     string                 `protobuf:"bytes,3,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	Topic        string                 `protobuf:"bytes,4,opt,name=topic,proto3" json:"topic,omitempty"`
+	Partition    int32                  `protobuf:"varint,5,opt,name=partition,proto3" json:"partition,omitempty"`
+	// The committed offset is the NEXT offset to consume.
+	Offset        uint64 `protobuf:"varint,6,opt,name=offset,proto3" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommitOffsetRequest) Reset() {
+	*x = CommitOffsetRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommitOffsetRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommitOffsetRequest) ProtoMessage() {}
+
+func (x *CommitOffsetRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommitOffsetRequest.ProtoReflect.Descriptor instead.
+func (*CommitOffsetRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *CommitOffsetRequest) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+func (x *CommitOffsetRequest) GetGenerationId() int64 {
+	if x != nil {
+		return x.GenerationId
+	}
+	return 0
+}
+
+func (x *CommitOffsetRequest) GetMemberId() string {
+	if x != nil {
+		return x.MemberId
+	}
+	return ""
+}
+
+func (x *CommitOffsetRequest) GetTopic() string {
+	if x != nil {
+		return x.Topic
+	}
+	return ""
+}
+
+func (x *CommitOffsetRequest) GetPartition() int32 {
+	if x != nil {
+		return x.Partition
+	}
+	return 0
+}
+
+func (x *CommitOffsetRequest) GetOffset() uint64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+type CommitOffsetResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommitOffsetResponse) Reset() {
+	*x = CommitOffsetResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommitOffsetResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommitOffsetResponse) ProtoMessage() {}
+
+func (x *CommitOffsetResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommitOffsetResponse.ProtoReflect.Descriptor instead.
+func (*CommitOffsetResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{14}
+}
+
+type GetOffsetsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Group         string                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	Topic         string                 `protobuf:"bytes,2,opt,name=topic,proto3" json:"topic,omitempty"`
+	Partitions    []int32                `protobuf:"varint,3,rep,packed,name=partitions,proto3" json:"partitions,omitempty"` // empty = all partitions of the topic
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOffsetsRequest) Reset() {
+	*x = GetOffsetsRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOffsetsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOffsetsRequest) ProtoMessage() {}
+
+func (x *GetOffsetsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOffsetsRequest.ProtoReflect.Descriptor instead.
+func (*GetOffsetsRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GetOffsetsRequest) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+func (x *GetOffsetsRequest) GetTopic() string {
+	if x != nil {
+		return x.Topic
+	}
+	return ""
+}
+
+func (x *GetOffsetsRequest) GetPartitions() []int32 {
+	if x != nil {
+		return x.Partitions
+	}
+	return nil
+}
+
+type OffsetInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Partition     int32                  `protobuf:"varint,1,opt,name=partition,proto3" json:"partition,omitempty"`
+	Committed     bool                   `protobuf:"varint,2,opt,name=committed,proto3" json:"committed,omitempty"` // false when no commit exists for the partition
+	Offset        uint64                 `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OffsetInfo) Reset() {
+	*x = OffsetInfo{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OffsetInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OffsetInfo) ProtoMessage() {}
+
+func (x *OffsetInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OffsetInfo.ProtoReflect.Descriptor instead.
+func (*OffsetInfo) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *OffsetInfo) GetPartition() int32 {
+	if x != nil {
+		return x.Partition
+	}
+	return 0
+}
+
+func (x *OffsetInfo) GetCommitted() bool {
+	if x != nil {
+		return x.Committed
+	}
+	return false
+}
+
+func (x *OffsetInfo) GetOffset() uint64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+type GetOffsetsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Offsets       []*OffsetInfo          `protobuf:"bytes,1,rep,name=offsets,proto3" json:"offsets,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOffsetsResponse) Reset() {
+	*x = GetOffsetsResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOffsetsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOffsetsResponse) ProtoMessage() {}
+
+func (x *GetOffsetsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOffsetsResponse.ProtoReflect.Descriptor instead.
+func (*GetOffsetsResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetOffsetsResponse) GetOffsets() []*OffsetInfo {
+	if x != nil {
+		return x.Offsets
+	}
+	return nil
+}
+
+type DescribeGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Group         string                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DescribeGroupRequest) Reset() {
+	*x = DescribeGroupRequest{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DescribeGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DescribeGroupRequest) ProtoMessage() {}
+
+func (x *DescribeGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DescribeGroupRequest.ProtoReflect.Descriptor instead.
+func (*DescribeGroupRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DescribeGroupRequest) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+type GroupMember struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MemberId      string                 `protobuf:"bytes,1,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	Assignment    []*PartitionAssignment `protobuf:"bytes,2,rep,name=assignment,proto3" json:"assignment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GroupMember) Reset() {
+	*x = GroupMember{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GroupMember) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupMember) ProtoMessage() {}
+
+func (x *GroupMember) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupMember.ProtoReflect.Descriptor instead.
+func (*GroupMember) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GroupMember) GetMemberId() string {
+	if x != nil {
+		return x.MemberId
+	}
+	return ""
+}
+
+func (x *GroupMember) GetAssignment() []*PartitionAssignment {
+	if x != nil {
+		return x.Assignment
+	}
+	return nil
+}
+
+type DescribeGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GenerationId  int64                  `protobuf:"varint,1,opt,name=generation_id,json=generationId,proto3" json:"generation_id,omitempty"`
+	Members       []*GroupMember         `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DescribeGroupResponse) Reset() {
+	*x = DescribeGroupResponse{}
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DescribeGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DescribeGroupResponse) ProtoMessage() {}
+
+func (x *DescribeGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DescribeGroupResponse.ProtoReflect.Descriptor instead.
+func (*DescribeGroupResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *DescribeGroupResponse) GetGenerationId() int64 {
+	if x != nil {
+		return x.GenerationId
+	}
+	return 0
+}
+
+func (x *DescribeGroupResponse) GetMembers() []*GroupMember {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
 type CreateTopicRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -467,7 +1272,7 @@ type CreateTopicRequest struct {
 
 func (x *CreateTopicRequest) Reset() {
 	*x = CreateTopicRequest{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[6]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -479,7 +1284,7 @@ func (x *CreateTopicRequest) String() string {
 func (*CreateTopicRequest) ProtoMessage() {}
 
 func (x *CreateTopicRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[6]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -492,7 +1297,7 @@ func (x *CreateTopicRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTopicRequest.ProtoReflect.Descriptor instead.
 func (*CreateTopicRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{6}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CreateTopicRequest) GetName() string {
@@ -517,7 +1322,7 @@ type CreateTopicResponse struct {
 
 func (x *CreateTopicResponse) Reset() {
 	*x = CreateTopicResponse{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[7]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -529,7 +1334,7 @@ func (x *CreateTopicResponse) String() string {
 func (*CreateTopicResponse) ProtoMessage() {}
 
 func (x *CreateTopicResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[7]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -542,7 +1347,7 @@ func (x *CreateTopicResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTopicResponse.ProtoReflect.Descriptor instead.
 func (*CreateTopicResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{7}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{22}
 }
 
 type TopicInfo struct {
@@ -555,7 +1360,7 @@ type TopicInfo struct {
 
 func (x *TopicInfo) Reset() {
 	*x = TopicInfo{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[8]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -567,7 +1372,7 @@ func (x *TopicInfo) String() string {
 func (*TopicInfo) ProtoMessage() {}
 
 func (x *TopicInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[8]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -580,7 +1385,7 @@ func (x *TopicInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TopicInfo.ProtoReflect.Descriptor instead.
 func (*TopicInfo) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{8}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *TopicInfo) GetName() string {
@@ -605,7 +1410,7 @@ type ListTopicsRequest struct {
 
 func (x *ListTopicsRequest) Reset() {
 	*x = ListTopicsRequest{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[9]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -617,7 +1422,7 @@ func (x *ListTopicsRequest) String() string {
 func (*ListTopicsRequest) ProtoMessage() {}
 
 func (x *ListTopicsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[9]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -630,7 +1435,7 @@ func (x *ListTopicsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTopicsRequest.ProtoReflect.Descriptor instead.
 func (*ListTopicsRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{9}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{24}
 }
 
 type ListTopicsResponse struct {
@@ -642,7 +1447,7 @@ type ListTopicsResponse struct {
 
 func (x *ListTopicsResponse) Reset() {
 	*x = ListTopicsResponse{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[10]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -654,7 +1459,7 @@ func (x *ListTopicsResponse) String() string {
 func (*ListTopicsResponse) ProtoMessage() {}
 
 func (x *ListTopicsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[10]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -667,7 +1472,7 @@ func (x *ListTopicsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTopicsResponse.ProtoReflect.Descriptor instead.
 func (*ListTopicsResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{10}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListTopicsResponse) GetTopics() []*TopicInfo {
@@ -686,7 +1491,7 @@ type DescribeTopicRequest struct {
 
 func (x *DescribeTopicRequest) Reset() {
 	*x = DescribeTopicRequest{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[11]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -698,7 +1503,7 @@ func (x *DescribeTopicRequest) String() string {
 func (*DescribeTopicRequest) ProtoMessage() {}
 
 func (x *DescribeTopicRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[11]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -711,7 +1516,7 @@ func (x *DescribeTopicRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeTopicRequest.ProtoReflect.Descriptor instead.
 func (*DescribeTopicRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{11}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *DescribeTopicRequest) GetName() string {
@@ -730,7 +1535,7 @@ type DescribeTopicResponse struct {
 
 func (x *DescribeTopicResponse) Reset() {
 	*x = DescribeTopicResponse{}
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[12]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -742,7 +1547,7 @@ func (x *DescribeTopicResponse) String() string {
 func (*DescribeTopicResponse) ProtoMessage() {}
 
 func (x *DescribeTopicResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[12]
+	mi := &file_api_proto_relayforge_v1_relayforge_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -755,7 +1560,7 @@ func (x *DescribeTopicResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeTopicResponse.ProtoReflect.Descriptor instead.
 func (*DescribeTopicResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{12}
+	return file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *DescribeTopicResponse) GetTopic() *TopicInfo {
@@ -795,7 +1600,64 @@ const file_api_proto_relayforge_v1_relayforge_proto_rawDesc = "" +
 	"\arecords\x18\x01 \x03(\v2\x1c.relayforge.v1.FetchedRecordR\arecords\x12\x1f\n" +
 	"\vnext_offset\x18\x02 \x01(\x04R\n" +
 	"nextOffset\x12%\n" +
-	"\x0ehigh_watermark\x18\x03 \x01(\x04R\rhighWatermark\"Q\n" +
+	"\x0ehigh_watermark\x18\x03 \x01(\x04R\rhighWatermark\"\x89\x01\n" +
+	"\x10JoinGroupRequest\x12\x14\n" +
+	"\x05group\x18\x01 \x01(\tR\x05group\x12\x1b\n" +
+	"\tmember_id\x18\x02 \x01(\tR\bmemberId\x12\x14\n" +
+	"\x05topic\x18\x03 \x01(\tR\x05topic\x12,\n" +
+	"\x12session_timeout_ms\x18\x04 \x01(\x05R\x10sessionTimeoutMs\"U\n" +
+	"\x11JoinGroupResponse\x12#\n" +
+	"\rgeneration_id\x18\x01 \x01(\x03R\fgenerationId\x12\x1b\n" +
+	"\tmember_id\x18\x02 \x01(\tR\bmemberId\"K\n" +
+	"\x13PartitionAssignment\x12\x14\n" +
+	"\x05topic\x18\x01 \x01(\tR\x05topic\x12\x1e\n" +
+	"\n" +
+	"partitions\x18\x02 \x03(\x05R\n" +
+	"partitions\"j\n" +
+	"\x10SyncGroupRequest\x12\x14\n" +
+	"\x05group\x18\x01 \x01(\tR\x05group\x12#\n" +
+	"\rgeneration_id\x18\x02 \x01(\x03R\fgenerationId\x12\x1b\n" +
+	"\tmember_id\x18\x03 \x01(\tR\bmemberId\"W\n" +
+	"\x11SyncGroupResponse\x12B\n" +
+	"\n" +
+	"assignment\x18\x01 \x03(\v2\".relayforge.v1.PartitionAssignmentR\n" +
+	"assignment\"j\n" +
+	"\x10HeartbeatRequest\x12\x14\n" +
+	"\x05group\x18\x01 \x01(\tR\x05group\x12#\n" +
+	"\rgeneration_id\x18\x02 \x01(\x03R\fgenerationId\x12\x1b\n" +
+	"\tmember_id\x18\x03 \x01(\tR\bmemberId\"\x13\n" +
+	"\x11HeartbeatResponse\"\xb9\x01\n" +
+	"\x13CommitOffsetRequest\x12\x14\n" +
+	"\x05group\x18\x01 \x01(\tR\x05group\x12#\n" +
+	"\rgeneration_id\x18\x02 \x01(\x03R\fgenerationId\x12\x1b\n" +
+	"\tmember_id\x18\x03 \x01(\tR\bmemberId\x12\x14\n" +
+	"\x05topic\x18\x04 \x01(\tR\x05topic\x12\x1c\n" +
+	"\tpartition\x18\x05 \x01(\x05R\tpartition\x12\x16\n" +
+	"\x06offset\x18\x06 \x01(\x04R\x06offset\"\x16\n" +
+	"\x14CommitOffsetResponse\"_\n" +
+	"\x11GetOffsetsRequest\x12\x14\n" +
+	"\x05group\x18\x01 \x01(\tR\x05group\x12\x14\n" +
+	"\x05topic\x18\x02 \x01(\tR\x05topic\x12\x1e\n" +
+	"\n" +
+	"partitions\x18\x03 \x03(\x05R\n" +
+	"partitions\"`\n" +
+	"\n" +
+	"OffsetInfo\x12\x1c\n" +
+	"\tpartition\x18\x01 \x01(\x05R\tpartition\x12\x1c\n" +
+	"\tcommitted\x18\x02 \x01(\bR\tcommitted\x12\x16\n" +
+	"\x06offset\x18\x03 \x01(\x04R\x06offset\"I\n" +
+	"\x12GetOffsetsResponse\x123\n" +
+	"\aoffsets\x18\x01 \x03(\v2\x19.relayforge.v1.OffsetInfoR\aoffsets\",\n" +
+	"\x14DescribeGroupRequest\x12\x14\n" +
+	"\x05group\x18\x01 \x01(\tR\x05group\"n\n" +
+	"\vGroupMember\x12\x1b\n" +
+	"\tmember_id\x18\x01 \x01(\tR\bmemberId\x12B\n" +
+	"\n" +
+	"assignment\x18\x02 \x03(\v2\".relayforge.v1.PartitionAssignmentR\n" +
+	"assignment\"r\n" +
+	"\x15DescribeGroupResponse\x12#\n" +
+	"\rgeneration_id\x18\x01 \x01(\x03R\fgenerationId\x124\n" +
+	"\amembers\x18\x02 \x03(\v2\x1a.relayforge.v1.GroupMemberR\amembers\"Q\n" +
 	"\x12CreateTopicRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12'\n" +
 	"\x0fpartition_count\x18\x02 \x01(\x05R\x0epartitionCount\"\x15\n" +
@@ -814,7 +1676,7 @@ const file_api_proto_relayforge_v1_relayforge_proto_rawDesc = "" +
 	"\x14ACK_MODE_UNSPECIFIED\x10\x00\x12\x11\n" +
 	"\rACK_MODE_NONE\x10\x01\x12\x14\n" +
 	"\x10ACK_MODE_WRITTEN\x10\x02\x12\x14\n" +
-	"\x10ACK_MODE_FLUSHED\x10\x032\x9f\x03\n" +
+	"\x10ACK_MODE_FLUSHED\x10\x032\x97\a\n" +
 	"\n" +
 	"RelayForge\x12H\n" +
 	"\aProduce\x12\x1d.relayforge.v1.ProduceRequest\x1a\x1e.relayforge.v1.ProduceResponse\x12B\n" +
@@ -822,7 +1684,14 @@ const file_api_proto_relayforge_v1_relayforge_proto_rawDesc = "" +
 	"\vCreateTopic\x12!.relayforge.v1.CreateTopicRequest\x1a\".relayforge.v1.CreateTopicResponse\x12Q\n" +
 	"\n" +
 	"ListTopics\x12 .relayforge.v1.ListTopicsRequest\x1a!.relayforge.v1.ListTopicsResponse\x12Z\n" +
-	"\rDescribeTopic\x12#.relayforge.v1.DescribeTopicRequest\x1a$.relayforge.v1.DescribeTopicResponseB1Z/relayforge/api/proto/relayforge/v1;relayforgev1b\x06proto3"
+	"\rDescribeTopic\x12#.relayforge.v1.DescribeTopicRequest\x1a$.relayforge.v1.DescribeTopicResponse\x12N\n" +
+	"\tJoinGroup\x12\x1f.relayforge.v1.JoinGroupRequest\x1a .relayforge.v1.JoinGroupResponse\x12N\n" +
+	"\tSyncGroup\x12\x1f.relayforge.v1.SyncGroupRequest\x1a .relayforge.v1.SyncGroupResponse\x12N\n" +
+	"\tHeartbeat\x12\x1f.relayforge.v1.HeartbeatRequest\x1a .relayforge.v1.HeartbeatResponse\x12W\n" +
+	"\fCommitOffset\x12\".relayforge.v1.CommitOffsetRequest\x1a#.relayforge.v1.CommitOffsetResponse\x12Q\n" +
+	"\n" +
+	"GetOffsets\x12 .relayforge.v1.GetOffsetsRequest\x1a!.relayforge.v1.GetOffsetsResponse\x12Z\n" +
+	"\rDescribeGroup\x12#.relayforge.v1.DescribeGroupRequest\x1a$.relayforge.v1.DescribeGroupResponseB1Z/relayforge/api/proto/relayforge/v1;relayforgev1b\x06proto3"
 
 var (
 	file_api_proto_relayforge_v1_relayforge_proto_rawDescOnce sync.Once
@@ -837,7 +1706,7 @@ func file_api_proto_relayforge_v1_relayforge_proto_rawDescGZIP() []byte {
 }
 
 var file_api_proto_relayforge_v1_relayforge_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_proto_relayforge_v1_relayforge_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_api_proto_relayforge_v1_relayforge_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_api_proto_relayforge_v1_relayforge_proto_goTypes = []any{
 	(AckMode)(0),                  // 0: relayforge.v1.AckMode
 	(*Message)(nil),               // 1: relayforge.v1.Message
@@ -846,35 +1715,66 @@ var file_api_proto_relayforge_v1_relayforge_proto_goTypes = []any{
 	(*FetchRequest)(nil),          // 4: relayforge.v1.FetchRequest
 	(*FetchedRecord)(nil),         // 5: relayforge.v1.FetchedRecord
 	(*FetchResponse)(nil),         // 6: relayforge.v1.FetchResponse
-	(*CreateTopicRequest)(nil),    // 7: relayforge.v1.CreateTopicRequest
-	(*CreateTopicResponse)(nil),   // 8: relayforge.v1.CreateTopicResponse
-	(*TopicInfo)(nil),             // 9: relayforge.v1.TopicInfo
-	(*ListTopicsRequest)(nil),     // 10: relayforge.v1.ListTopicsRequest
-	(*ListTopicsResponse)(nil),    // 11: relayforge.v1.ListTopicsResponse
-	(*DescribeTopicRequest)(nil),  // 12: relayforge.v1.DescribeTopicRequest
-	(*DescribeTopicResponse)(nil), // 13: relayforge.v1.DescribeTopicResponse
+	(*JoinGroupRequest)(nil),      // 7: relayforge.v1.JoinGroupRequest
+	(*JoinGroupResponse)(nil),     // 8: relayforge.v1.JoinGroupResponse
+	(*PartitionAssignment)(nil),   // 9: relayforge.v1.PartitionAssignment
+	(*SyncGroupRequest)(nil),      // 10: relayforge.v1.SyncGroupRequest
+	(*SyncGroupResponse)(nil),     // 11: relayforge.v1.SyncGroupResponse
+	(*HeartbeatRequest)(nil),      // 12: relayforge.v1.HeartbeatRequest
+	(*HeartbeatResponse)(nil),     // 13: relayforge.v1.HeartbeatResponse
+	(*CommitOffsetRequest)(nil),   // 14: relayforge.v1.CommitOffsetRequest
+	(*CommitOffsetResponse)(nil),  // 15: relayforge.v1.CommitOffsetResponse
+	(*GetOffsetsRequest)(nil),     // 16: relayforge.v1.GetOffsetsRequest
+	(*OffsetInfo)(nil),            // 17: relayforge.v1.OffsetInfo
+	(*GetOffsetsResponse)(nil),    // 18: relayforge.v1.GetOffsetsResponse
+	(*DescribeGroupRequest)(nil),  // 19: relayforge.v1.DescribeGroupRequest
+	(*GroupMember)(nil),           // 20: relayforge.v1.GroupMember
+	(*DescribeGroupResponse)(nil), // 21: relayforge.v1.DescribeGroupResponse
+	(*CreateTopicRequest)(nil),    // 22: relayforge.v1.CreateTopicRequest
+	(*CreateTopicResponse)(nil),   // 23: relayforge.v1.CreateTopicResponse
+	(*TopicInfo)(nil),             // 24: relayforge.v1.TopicInfo
+	(*ListTopicsRequest)(nil),     // 25: relayforge.v1.ListTopicsRequest
+	(*ListTopicsResponse)(nil),    // 26: relayforge.v1.ListTopicsResponse
+	(*DescribeTopicRequest)(nil),  // 27: relayforge.v1.DescribeTopicRequest
+	(*DescribeTopicResponse)(nil), // 28: relayforge.v1.DescribeTopicResponse
 }
 var file_api_proto_relayforge_v1_relayforge_proto_depIdxs = []int32{
 	0,  // 0: relayforge.v1.ProduceRequest.ack_mode:type_name -> relayforge.v1.AckMode
 	1,  // 1: relayforge.v1.ProduceRequest.messages:type_name -> relayforge.v1.Message
 	5,  // 2: relayforge.v1.FetchResponse.records:type_name -> relayforge.v1.FetchedRecord
-	9,  // 3: relayforge.v1.ListTopicsResponse.topics:type_name -> relayforge.v1.TopicInfo
-	9,  // 4: relayforge.v1.DescribeTopicResponse.topic:type_name -> relayforge.v1.TopicInfo
-	2,  // 5: relayforge.v1.RelayForge.Produce:input_type -> relayforge.v1.ProduceRequest
-	4,  // 6: relayforge.v1.RelayForge.Fetch:input_type -> relayforge.v1.FetchRequest
-	7,  // 7: relayforge.v1.RelayForge.CreateTopic:input_type -> relayforge.v1.CreateTopicRequest
-	10, // 8: relayforge.v1.RelayForge.ListTopics:input_type -> relayforge.v1.ListTopicsRequest
-	12, // 9: relayforge.v1.RelayForge.DescribeTopic:input_type -> relayforge.v1.DescribeTopicRequest
-	3,  // 10: relayforge.v1.RelayForge.Produce:output_type -> relayforge.v1.ProduceResponse
-	6,  // 11: relayforge.v1.RelayForge.Fetch:output_type -> relayforge.v1.FetchResponse
-	8,  // 12: relayforge.v1.RelayForge.CreateTopic:output_type -> relayforge.v1.CreateTopicResponse
-	11, // 13: relayforge.v1.RelayForge.ListTopics:output_type -> relayforge.v1.ListTopicsResponse
-	13, // 14: relayforge.v1.RelayForge.DescribeTopic:output_type -> relayforge.v1.DescribeTopicResponse
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	9,  // 3: relayforge.v1.SyncGroupResponse.assignment:type_name -> relayforge.v1.PartitionAssignment
+	17, // 4: relayforge.v1.GetOffsetsResponse.offsets:type_name -> relayforge.v1.OffsetInfo
+	9,  // 5: relayforge.v1.GroupMember.assignment:type_name -> relayforge.v1.PartitionAssignment
+	20, // 6: relayforge.v1.DescribeGroupResponse.members:type_name -> relayforge.v1.GroupMember
+	24, // 7: relayforge.v1.ListTopicsResponse.topics:type_name -> relayforge.v1.TopicInfo
+	24, // 8: relayforge.v1.DescribeTopicResponse.topic:type_name -> relayforge.v1.TopicInfo
+	2,  // 9: relayforge.v1.RelayForge.Produce:input_type -> relayforge.v1.ProduceRequest
+	4,  // 10: relayforge.v1.RelayForge.Fetch:input_type -> relayforge.v1.FetchRequest
+	22, // 11: relayforge.v1.RelayForge.CreateTopic:input_type -> relayforge.v1.CreateTopicRequest
+	25, // 12: relayforge.v1.RelayForge.ListTopics:input_type -> relayforge.v1.ListTopicsRequest
+	27, // 13: relayforge.v1.RelayForge.DescribeTopic:input_type -> relayforge.v1.DescribeTopicRequest
+	7,  // 14: relayforge.v1.RelayForge.JoinGroup:input_type -> relayforge.v1.JoinGroupRequest
+	10, // 15: relayforge.v1.RelayForge.SyncGroup:input_type -> relayforge.v1.SyncGroupRequest
+	12, // 16: relayforge.v1.RelayForge.Heartbeat:input_type -> relayforge.v1.HeartbeatRequest
+	14, // 17: relayforge.v1.RelayForge.CommitOffset:input_type -> relayforge.v1.CommitOffsetRequest
+	16, // 18: relayforge.v1.RelayForge.GetOffsets:input_type -> relayforge.v1.GetOffsetsRequest
+	19, // 19: relayforge.v1.RelayForge.DescribeGroup:input_type -> relayforge.v1.DescribeGroupRequest
+	3,  // 20: relayforge.v1.RelayForge.Produce:output_type -> relayforge.v1.ProduceResponse
+	6,  // 21: relayforge.v1.RelayForge.Fetch:output_type -> relayforge.v1.FetchResponse
+	23, // 22: relayforge.v1.RelayForge.CreateTopic:output_type -> relayforge.v1.CreateTopicResponse
+	26, // 23: relayforge.v1.RelayForge.ListTopics:output_type -> relayforge.v1.ListTopicsResponse
+	28, // 24: relayforge.v1.RelayForge.DescribeTopic:output_type -> relayforge.v1.DescribeTopicResponse
+	8,  // 25: relayforge.v1.RelayForge.JoinGroup:output_type -> relayforge.v1.JoinGroupResponse
+	11, // 26: relayforge.v1.RelayForge.SyncGroup:output_type -> relayforge.v1.SyncGroupResponse
+	13, // 27: relayforge.v1.RelayForge.Heartbeat:output_type -> relayforge.v1.HeartbeatResponse
+	15, // 28: relayforge.v1.RelayForge.CommitOffset:output_type -> relayforge.v1.CommitOffsetResponse
+	18, // 29: relayforge.v1.RelayForge.GetOffsets:output_type -> relayforge.v1.GetOffsetsResponse
+	21, // 30: relayforge.v1.RelayForge.DescribeGroup:output_type -> relayforge.v1.DescribeGroupResponse
+	20, // [20:31] is the sub-list for method output_type
+	9,  // [9:20] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_relayforge_v1_relayforge_proto_init() }
@@ -888,7 +1788,7 @@ func file_api_proto_relayforge_v1_relayforge_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_relayforge_v1_relayforge_proto_rawDesc), len(file_api_proto_relayforge_v1_relayforge_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   13,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

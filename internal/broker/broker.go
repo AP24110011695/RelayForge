@@ -17,8 +17,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"relayforge/internal/group"
 	"relayforge/internal/logengine"
 	"relayforge/internal/metadata"
+	"relayforge/internal/offsets"
 	"relayforge/internal/record"
 )
 
@@ -132,6 +134,7 @@ type Broker struct {
 	inflight      sync.WaitGroup // produces between the closed-check and queue send
 	store         *metadata.Store
 	parts         map[string][]*partition // topic -> partitions
+	groups        *group.Coordinator
 	queueDepth    int
 	maxRecordSize int
 	rr            atomic.Uint32 // keyless round-robin counter
@@ -181,6 +184,13 @@ func Open(opts Options) (*Broker, error) {
 		}
 		b.parts[t.Name] = parts
 	}
+	b.groups = group.NewCoordinator(opts.DataDir, func(topic string) (int32, bool) {
+		t, ok := store.Get(topic)
+		if !ok {
+			return 0, false
+		}
+		return t.PartitionCount, true
+	}, 0)
 	return b, nil
 }
 
@@ -469,7 +479,69 @@ func (b *Broker) Close() error {
 	// mid-submit once this wait returns.
 	b.inflight.Wait()
 	b.closePartsAndWait(parts)
+	b.groups.Close()
 	return nil
+}
+
+// --- Consumer groups (delegating to the coordinator) ---
+
+// JoinGroup adds (or re-joins) a member to a consumer group and triggers a
+// rebalance.
+func (b *Broker) JoinGroup(group, memberID, topic string, sessionTimeout time.Duration) (int64, string, error) {
+	return b.groups.Join(group, memberID, topic, sessionTimeout)
+}
+
+// SyncGroup returns the member's subscribed topic and its assignment for
+// the given generation.
+func (b *Broker) SyncGroup(group string, generation int64, memberID string) (string, map[int32]bool, error) {
+	return b.groups.Sync(group, generation, memberID)
+}
+
+// Heartbeat refreshes a member's session; stale generations are fenced.
+func (b *Broker) Heartbeat(group string, generation int64, memberID string) error {
+	return b.groups.Heartbeat(group, generation, memberID)
+}
+
+// CommitOffset durably stores a fenced offset commit. The committed offset
+// is the NEXT offset to consume.
+func (b *Broker) CommitOffset(group string, generation int64, memberID, topic string, partition int32, offset uint64) error {
+	return b.groups.Commit(group, generation, memberID, offsets.Record{
+		Topic: topic, Partition: partition, Offset: offset,
+	})
+}
+
+// GetOffsets returns committed offsets for the requested partitions (0
+// partitions = all partitions of the topic).
+func (b *Broker) GetOffsets(group, topic string, partitions []int32) ([]offsets.Record, error) {
+	count, ok := b.store.Get(topic)
+	if !ok {
+		return nil, fmt.Errorf("%w: %q", ErrUnknownTopicOrPartition, topic)
+	}
+	ids := partitions
+	if len(ids) == 0 {
+		for i := int32(0); i < count.PartitionCount; i++ {
+			ids = append(ids, i)
+		}
+	}
+	out := make([]offsets.Record, 0, len(ids))
+	for _, p := range ids {
+		if p < 0 || p >= count.PartitionCount {
+			return nil, fmt.Errorf("%w: (%q, %d)", ErrUnknownTopicOrPartition, topic, p)
+		}
+		off, committed, err := b.groups.Committed(group, p)
+		if err != nil {
+			return nil, err
+		}
+		if committed {
+			out = append(out, offsets.Record{Topic: topic, Partition: p, Offset: off})
+		}
+	}
+	return out, nil
+}
+
+// DescribeGroup returns the generation and member assignments.
+func (b *Broker) DescribeGroup(group string) (int64, []group.MemberInfo, error) {
+	return b.groups.Describe(group)
 }
 
 func (b *Broker) closePartsAndWait(parts map[string][]*partition) {
