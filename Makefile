@@ -2,16 +2,17 @@
 #
 # Run from the WSL2 ext4 checkout (see docs/ENVIRONMENT.md). GO is pinned to
 # /usr/local/go/bin because that is where the toolchain lives; it falls back
-# to PATH if the pin disappears.
+# to PATH if the pin disappears. protoc plugins are expected in ~/go/bin.
 
 GO := /usr/local/go/bin/go
 ifeq ($(wildcard /usr/local/go/bin/go),)
 GO := go
 endif
+export PATH := $(HOME)/go/bin:$(PATH)
 
 FUZZTIME ?= 15s
 
-.PHONY: build test test-race vet fmt fuzz
+.PHONY: build test test-race vet fmt fuzz proto
 
 build:
 	$(GO) build ./...
@@ -28,6 +29,12 @@ vet:
 
 fmt:
 	gofmt -l -w .
+
+# Regenerates the protobuf/gRPC code. Must be diff-idempotent.
+proto:
+	protoc --go_out=. --go_opt=paths=source_relative \
+		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+		api/proto/relayforge/v1/relayforge.proto
 
 # Runs each Fuzz* target for FUZZTIME, one invocation per target (go test
 # -fuzz only accepts a single target per run). Prints a note until the first

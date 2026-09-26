@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+// RelayForge v1 wire API. Unary RPCs over gRPC; see docs/PROTOCOL.md for
+// semantics, status-code mapping, and the additive-evolution policy.
+package relayforge.v1;
+
+option go_package = "relayforge/api/proto/relayforge/v1;relayforgev1";
+
+// AckMode selects the durability promise made before Produce returns.
+// Mapping to the storage ladder is documented in docs/GUARANTEES.md.
+enum AckMode {
+  ACK_MODE_UNSPECIFIED = 0; // defaults to ACK_MODE_WRITTEN
+  ACK_MODE_NONE = 1;        // no durability promise
+  ACK_MODE_WRITTEN = 2;     // survives process crash (page cache)
+  ACK_MODE_FLUSHED = 3;     // fsync completed before the ack
+}
+
+message Message {
+  bytes key = 1;   // optional
+  bytes value = 2; // required (may be empty bytes, not absent)
+}
+
+message ProduceRequest {
+  string topic = 1;
+  int32 partition = 2;
+  AckMode ack_mode = 3;
+  repeated Message messages = 4;
+}
+
+message ProduceResponse {
+  // One offset per message, in request order. When the RPC fails partway,
+  // the error is returned and the response is not delivered: records
+  // already appended are visible to consumers but their offsets were never
+  // acknowledged (at-least-once on producer retry).
+  repeated uint64 offsets = 1;
+}
+
+message FetchRequest {
+  string topic = 1;
+  int32 partition = 2;
+  // Offset to start reading from. Reading exactly at high_watermark waits
+  // up to max_wait_ms for new data (long poll); an offset beyond
+  // high_watermark fails with OUT_OF_RANGE.
+  uint64 offset = 3;
+  int32 max_bytes = 4;    // <= 0 selects the server default
+  int32 max_wait_ms = 5;  // long-poll window when no data is available
+}
+
+message FetchedRecord {
+  uint64 offset = 1;
+  bytes key = 2;
+  bytes value = 3;
+  int64 timestamp_ms = 4;
+}
+
+message FetchResponse {
+  repeated FetchedRecord records = 1;
+  // Offset just past the last returned record; resume reads from here.
+  uint64 next_offset = 2;
+  // The log end at response time: the offset the next produced record
+  // will receive.
+  uint64 high_watermark = 3;
+}
+
+service RelayForge {
+  rpc Produce(ProduceRequest) returns (ProduceResponse);
+  rpc Fetch(FetchRequest) returns (FetchResponse);
+}
