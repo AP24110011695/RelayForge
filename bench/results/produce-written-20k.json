@@ -1,0 +1,32 @@
+{
+  "ack": "written",
+  "batch": 100,
+  "environment": {
+    "hostname": "AYUSH",
+    "os": "linux",
+    "arch": "amd64",
+    "cpus": 12,
+    "go_version": "go1.27.1",
+    "version": "v0.0.0-20260926123907-26a8b68dd0e4+dirty",
+    "commit": "26a8b68dd0e4b1c9664dde263222320198df61e2",
+    "notes": "ext4 on WSL2, Ryzen 5 5500U"
+  },
+  "mode": "produce",
+  "producers": 1,
+  "records": 20000,
+  "report": {
+    "records": 19500,
+    "rpc_samples": 200,
+    "errors": 0,
+    "records_per_sec": 25774.616375830876,
+    "duration_seconds": 0.756558302,
+    "p50_ms": 0.03431,
+    "p95_ms": 0.057906,
+    "p99_ms": 0.090189,
+    "max_ms": 0.123718,
+    "bytes_total": 19968000
+  },
+  "size_bytes": 1024,
+  "topic": "default",
+  "warmup": 500
+}

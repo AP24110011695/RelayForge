@@ -1,0 +1,32 @@
+{
+  "ack": "flushed",
+  "batch": 50,
+  "environment": {
+    "hostname": "AYUSH",
+    "os": "linux",
+    "arch": "amd64",
+    "cpus": 12,
+    "go_version": "go1.27.1",
+    "version": "v0.0.0-20260926123907-26a8b68dd0e4+dirty",
+    "commit": "26a8b68dd0e4b1c9664dde263222320198df61e2",
+    "notes": "ext4 on WSL2"
+  },
+  "mode": "produce",
+  "producers": 1,
+  "records": 3000,
+  "report": {
+    "records": 2900,
+    "rpc_samples": 60,
+    "errors": 0,
+    "records_per_sec": 239.9458932138174,
+    "duration_seconds": 12.086058074,
+    "p50_ms": 3.830188,
+    "p95_ms": 5.595054,
+    "p99_ms": 6.313764,
+    "max_ms": 6.313764,
+    "bytes_total": 2969600
+  },
+  "size_bytes": 1024,
+  "topic": "default",
+  "warmup": 100
+}

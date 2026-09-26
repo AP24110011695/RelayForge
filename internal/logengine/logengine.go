@@ -326,6 +326,13 @@ func isCorruption(err error) bool {
 		errors.Is(err, record.ErrRecordTooLarge)
 }
 
+// encodeBufPool reuses record-encode buffers across appends: the profile
+// showed allocation was the only non-syscall cost worth addressing (see
+// docs/BENCHMARKS.md for the measured before/after).
+var encodeBufPool = sync.Pool{
+	New: func() any { return make([]byte, 0, 4096) },
+}
+
 // Append validates and writes one record to the active segment, rolling the
 // segment first when the record would overflow it, and returns the assigned
 // offset. A zero Timestamp is stamped with the current wall clock
@@ -347,8 +354,10 @@ func (l *Log) Append(rec record.Record, dur Durability) (uint64, error) {
 	if rec.Timestamp == 0 {
 		rec.Timestamp = time.Now().UnixMilli()
 	}
-	buf, err := rec.Encode(l.maxRecordSize)
+	buf := encodeBufPool.Get().([]byte)[:0]
+	buf, err := rec.AppendEncoded(buf, l.maxRecordSize)
 	if err != nil {
+		encodeBufPool.Put(buf)
 		return 0, err
 	}
 	active := l.segments[len(l.segments)-1]
@@ -360,8 +369,10 @@ func (l *Log) Append(rec record.Record, dur Durability) (uint64, error) {
 	}
 	position := active.size
 	n, err := active.logFile.WriteAt(buf, position)
-	if err == nil && n != len(buf) {
-		err = fmt.Errorf("%w: wrote %d of %d bytes", io.ErrShortWrite, n, len(buf))
+	bufLen := len(buf)
+	encodeBufPool.Put(buf) // buf is dead below this line (length captured)
+	if err == nil && n != bufLen {
+		err = fmt.Errorf("%w: wrote %d of %d bytes", io.ErrShortWrite, n, bufLen)
 	}
 	if err != nil {
 		// Best effort: remove any partial bytes so the file stays a
@@ -373,8 +384,8 @@ func (l *Log) Append(rec record.Record, dur Durability) (uint64, error) {
 	// step, so even a failed fsync leaves a consistent log that owns the
 	// offset (the caller must simply not treat the record as flushed).
 	active.maybeIndex(l.next, position)
-	active.bytesSinceIndex += int64(len(buf))
-	active.size += int64(len(buf))
+	active.bytesSinceIndex += int64(bufLen)
+	active.size += int64(bufLen)
 	offset := l.next
 	l.next++
 	if dur == DurabilityFlushed {

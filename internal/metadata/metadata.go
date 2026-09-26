@@ -62,6 +62,9 @@ type Store struct {
 
 // Open loads (or initializes) the metadata snapshot under dataDir.
 func Open(dataDir string) (*Store, error) {
+	if err := os.MkdirAll(dataDir, 0o755); err != nil {
+		return nil, err
+	}
 	s := &Store{dir: dataDir, tab: table{Topics: map[string]Topic{}}}
 	data, jerr := os.ReadFile(s.jsonPath())
 	crcData, cerr := os.ReadFile(s.crcPath())

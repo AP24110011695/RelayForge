@@ -82,6 +82,13 @@ func (r Record) Size(maxSize int) (int, error) {
 
 // Encode returns the fully encoded record in a freshly allocated buffer.
 func (r Record) Encode(maxSize int) ([]byte, error) {
+	return r.AppendEncoded(nil, maxSize)
+}
+
+// AppendEncoded appends the encoded record to dst (growing it as needed)
+// and returns the slice. Callers can reuse dst across calls to avoid
+// per-record allocations.
+func (r Record) AppendEncoded(dst []byte, maxSize int) ([]byte, error) {
 	total, err := r.Size(maxSize)
 	if err != nil {
 		return nil, err
@@ -89,7 +96,11 @@ func (r Record) Encode(maxSize int) ([]byte, error) {
 	keyLen := len(r.Key)
 	valLen := len(r.Value)
 
-	buf := make([]byte, total)
+	buf := dst
+	if cap(buf) < total {
+		buf = make([]byte, total)
+	}
+	buf = buf[:total]
 	binary.LittleEndian.PutUint32(buf[0:4], uint32(total-4)) // frame length
 	body := buf[8:]                                          // version through value: the CRC-protected region
 	body[0] = Version1
