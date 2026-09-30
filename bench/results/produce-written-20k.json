@@ -2,7 +2,7 @@
   "ack": "written",
   "batch": 100,
   "environment": {
-    "hostname": "AYUSH",
+    "hostname": "dev-host",
     "os": "linux",
     "arch": "amd64",
     "cpus": 12,

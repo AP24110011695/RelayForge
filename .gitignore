@@ -5,16 +5,27 @@
 *.so
 *.dylib
 /bin/
+/rfbroker
+/relayctl
+/rfbench
 
 # Test and coverage artifacts
 *.test
 *.out
 coverage.*
+*.pprof
+*.profile
 
 # Broker data directories — broker storage must never be committed
 data/
+
+# Environment
+.env
+.env.*
 
 # Editors / OS
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
+

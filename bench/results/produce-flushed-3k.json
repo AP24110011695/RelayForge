@@ -2,7 +2,7 @@
   "ack": "flushed",
   "batch": 50,
   "environment": {
-    "hostname": "AYUSH",
+    "hostname": "dev-host",
     "os": "linux",
     "arch": "amd64",
     "cpus": 12,
